@@ -35,13 +35,16 @@ class MarketEnv(gym.Env):
     def _portfolio_value(self):
         value = 0
         for i, asset in enumerate(self.assets):
-            value += len(asset)*self.assets_prices[i][self.ep_step]
+            value += len(asset)*self._day_price(i)
         return value
 
     def _full_value(self):
         value = self._portfolio_value()
         value += self.money
         return value
+
+    def _day_price(self, asset):
+        return self.assets_prices[asset][self.ep_step]
 
     def _observation_space(self):
         # wallet money, portifolio value
@@ -94,9 +97,13 @@ class MarketEnv(gym.Env):
 
         """
         self.ep_step += 1
-        self._take_action(action)
+        scope_actions = list(action)
+        self._take_action(scope_actions)
+        print(f"=========ACOES - Step{self.ep_step}=========")
         print(action)
         self.state = self._make_observation()
+        print(f"=========ESTADO - Step{self.ep_step}=========")
+        print(self.state)
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info()
@@ -113,44 +120,50 @@ class MarketEnv(gym.Env):
         else:
             return False
 
-    def _take_action(self, actions):
-        self.sold_profit = 0
-        self.num_bought = 0
-        self.overbuy = 0
-        self.oversell = 0
+    def _calc_appreciation(self):
+        apretiation = 0
+        for i, asset in enumerate(self.assets):
+            actual_price = self._day_price(i)
+            for bought_price in asset:
+                apretiation += (actual_price - bought_price)
+        return apretiation
 
-        for i, action in enumerate(actions):
-            # vende action %
+    def _sell_action(self, scope_actions):
+        for i, action in enumerate(scope_actions):
             if action > 0:
-                actual_price = self.assets_prices[i][self.ep_step]
+                actual_price = self._day_price(i)
                 num_sold = 0
-                to_sell = (len(self.assets[i]) * action)
+                to_sell = int(len(self.assets[i]) * action)
                 while num_sold < to_sell and len(self.assets[i]) > 0:
                     bought_price = self.assets[i].popleft()
                     self.sold_profit += actual_price - bought_price
-                    self.money += actual_price
                     num_sold += 1
-                self.oversell = num_sold - to_sell
+                self.money += (actual_price*to_sell)
+                scope_actions[i] = 0.0
 
-        for i, action in enumerate(actions):
-            # compra action %
-            if action < 0:
-                actual_price = self.assets_prices[i][self.ep_step]
-                num_bought = 0
-                port_amt = len(self.assets[i])
-                if port_amt == 0:
-                    port_amt += 1
-                to_buy = (port_amt * (-action))
-                while self.money > actual_price and num_bought < to_buy:
-                    self.assets[i].append(actual_price)  # append price
-                    self.money -= actual_price
-                    self.num_bought += 1
-                self.overbuy = num_bought - to_buy
+    def _buy_action(self, scope_actions):
+        total = sum(scope_actions)
+        if total != 0:
+            normal_actions = [x/abs(total) for x in scope_actions]
+            for i, action in enumerate(normal_actions):
+                action = abs(action)
+                actual_price = self._day_price(i)
+                to_buy = int(action*self.money) // actual_price
+                self.assets[i].extend([actual_price]*to_buy)
+                self.num_bought = to_buy
+                self.money -= (actual_price*to_buy)
+
+
+    def _take_action(self, scope_actions):
+        self.sold_profit = 0
+        self.num_bought = 0
+        self._sell_action(scope_actions)
+        self._buy_action(scope_actions)
+
+
 
     def _make_observation(self):
         obs = np.zeros(self.observation_space.shape)
-        # obs_insider = np.zeros(self.observation_space[1].shape)
-
         obs[0] = self.money  # wallet money
         obs[1] = self._portfolio_value()  # portifolio money
         for i in range(2, self.n_insiders+2):
@@ -163,10 +176,10 @@ class MarketEnv(gym.Env):
         buy_w = -1
         end_w = 1
         reward = 0
-        reward += self.oversell + self.overbuy
         if self._check_done():
             reward += end_w*(self._full_value() - self.start_money)
         reward += (self.num_bought*buy_w)
+        reward += self._calc_appreciation()
         reward += self.sold_profit
         return reward
 
@@ -183,7 +196,6 @@ class MarketEnv(gym.Env):
             print(f"\tASSET {i}:")
             print("\t\tNum Assets: {}".format(len(asset)))
             print(f"\t\tAsset Price: {self.assets_prices[i][self.ep_step]}")
-            # print("\t\tMean value: {}".format(mean(asset)))
 
     def reset(self):
         self.ep_step = -1
@@ -201,4 +213,7 @@ class MarketEnv(gym.Env):
 
 
 if __name__ == "__main__":
-    env = MarketEnv(3, 20, [[],[],[]], [[],[],[]])
+    env = MarketEnv(3, 20, [[1, 2, 3],[3, 2, 1],[2, 3, 1]],
+                    [[1, 1, 0],[0, 0, 0 ],[1, 0, 0]])
+    env.ep_step += 1
+    env._take_action([0.7, -0.3, -0.1])
