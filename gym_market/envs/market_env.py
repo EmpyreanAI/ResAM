@@ -99,11 +99,7 @@ class MarketEnv(gym.Env):
         self.ep_step += 1
         scope_actions = list(action)
         self._take_action(scope_actions)
-        print(f"=========ACOES - Step{self.ep_step}=========")
-        print(action)
         self.state = self._make_observation()
-        print(f"=========ESTADO - Step{self.ep_step}=========")
-        print(self.state)
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info()
@@ -148,7 +144,7 @@ class MarketEnv(gym.Env):
             for i, action in enumerate(normal_actions):
                 action = abs(action)
                 actual_price = self._day_price(i)
-                to_buy = int(action*self.money) // actual_price
+                to_buy = int(int(action*self.money) // actual_price)
                 self.assets[i].extend([actual_price]*to_buy)
                 self.num_bought = to_buy
                 self.money -= (actual_price*to_buy)
