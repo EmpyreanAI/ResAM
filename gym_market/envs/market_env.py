@@ -153,6 +153,8 @@ class MarketEnv(gym.Env):
     def _take_action(self, scope_actions):
         self.sold_profit = 0
         self.num_bought = 0
+        # print('[GYM]', end=' ')
+        # print(scope_actions)
         self._sell_action(scope_actions)
         self._buy_action(scope_actions)
 
