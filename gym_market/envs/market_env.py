@@ -23,12 +23,10 @@ class MarketEnv(gym.Env):
         self.num_bought = 0
         self.ep_step = -1
         self.assets = []
-        self.oversell = 0
-        self.oversbuy = 0
         self.episode = 0
         for i in range(0, n_insiders):
             self.assets.append(deque())
-
+        self.pre_state = []
         self.action_space = self._action_space()
         self.observation_space = self._observation_space()
 
@@ -65,6 +63,15 @@ class MarketEnv(gym.Env):
         action_low = [-1, -1, -1]
         action_high = [1, 1, 1]
         return spaces.Box(np.array(action_low), np.array(action_high))
+
+    def _pls_help(self, action, reward, done):
+        print(f"============ Episode Step {self.ep_step}")
+        print(f"Estado Previo: {self.pre_state}")
+        print(f"Acoes: {action}")
+        print(f"Estado: {self.state}")
+        print(f"Lucro atual: {self._full_value() - self.start_money}")
+        print(f"Recompensa: {reward}")
+        print(f"Done: {done}")
 
     def step(self, action):
         """.
@@ -103,8 +110,9 @@ class MarketEnv(gym.Env):
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info()
+        self._pls_help(action, reward, done)
         if done is True:
-            print(self._full_value() - self.start_money)
+            print(f"Lucro Total: {self._full_value() - self.start_money}")
         self.pre_state = self.state
         return self.state, reward, done, info
 
@@ -198,6 +206,7 @@ class MarketEnv(gym.Env):
     def reset(self):
         self.ep_step = -1
         self.episode += 1
+        self.pre_state = []
         self.money = self.start_money
         self.assets = []
         for i in range(0, self.n_insiders):
@@ -208,10 +217,3 @@ class MarketEnv(gym.Env):
     #     """Seed."""
     #     random.seed(seed)
     #     np.random.seed
-
-
-if __name__ == "__main__":
-    env = MarketEnv(3, 20, [[1, 2, 3],[3, 2, 1],[2, 3, 1]],
-                    [[1, 1, 0],[0, 0, 0 ],[1, 0, 0]])
-    env.ep_step += 1
-    env._take_action([0.7, -0.3, -0.1])
