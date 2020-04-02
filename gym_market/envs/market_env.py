@@ -110,7 +110,7 @@ class MarketEnv(gym.Env):
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info()
-        self._pls_help(action, reward, done)
+        # self._pls_help(action, reward, done)
         if done is True:
             print(f"Lucro Total: {self._full_value() - self.start_money}")
         self.pre_state = self.state
@@ -179,14 +179,15 @@ class MarketEnv(gym.Env):
 
     def _get_reward(self):
         """Reward is given for XY."""
-        buy_w = -1
-        end_w = 1
+        buy_w = -0.5
+        end_w = 5
         reward = 0
         if self._check_done():
             reward += end_w*(self._full_value() - self.start_money)
         reward += (self.num_bought*buy_w)
         reward += self._calc_appreciation()
         reward += self.sold_profit
+        reward /= 10
         return reward
 
     def _get_info(self):
