@@ -24,6 +24,7 @@ class MarketEnv(gym.Env):
         self.ep_step = -1
         self.assets = []
         self.episode = 0
+        self.overall_reward = 0
         for i in range(0, n_insiders):
             self.assets.append(deque())
         self.pre_state = []
@@ -113,6 +114,7 @@ class MarketEnv(gym.Env):
         # self._pls_help(action, reward, done)
         if done is True:
             print(f"Lucro Total: {self._full_value() - self.start_money}")
+            print(f"Overall Reward: {self.overall_reward}")
         self.pre_state = self.state
         return self.state, reward, done, info
 
@@ -157,7 +159,6 @@ class MarketEnv(gym.Env):
                 self.num_bought = to_buy
                 self.money -= (actual_price*to_buy)
 
-
     def _take_action(self, scope_actions):
         self.sold_profit = 0
         self.num_bought = 0
@@ -165,8 +166,6 @@ class MarketEnv(gym.Env):
         # print(scope_actions)
         self._sell_action(scope_actions)
         self._buy_action(scope_actions)
-
-
 
     def _make_observation(self):
         obs = np.zeros(self.observation_space.shape)
@@ -179,15 +178,16 @@ class MarketEnv(gym.Env):
 
     def _get_reward(self):
         """Reward is given for XY."""
-        buy_w = -0.5
+        # buy_w = -0.5
         end_w = 5
         reward = 0
         if self._check_done():
             reward += end_w*(self._full_value() - self.start_money)
-        reward += (self.num_bought*buy_w)
+        # reward += (self.num_bought*buy_w)
         reward += self._calc_appreciation()
-        reward += self.sold_profit
-        reward /= 10
+        self.overall_reward += reward
+        # reward += self.sold_profit
+        # reward /= 10
         return reward
 
     def _get_info(self):
@@ -210,6 +210,7 @@ class MarketEnv(gym.Env):
         self.pre_state = []
         self.money = self.start_money
         self.assets = []
+        self.overall_reward = 0
         for i in range(0, self.n_insiders):
             self.assets.append(deque())
         return self._make_observation()
