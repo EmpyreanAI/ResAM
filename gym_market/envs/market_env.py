@@ -15,44 +15,30 @@ class MarketEnv(gym.Env):
     def __init__(self, n_insiders, start_money, assets_prices, insiders_preds):
         """Constructor."""
         self.start_money = start_money
-        self.money = start_money
+        self.balance = start_money
         self.n_insiders = n_insiders
         self.assets_prices = assets_prices
         self.insiders_preds = insiders_preds
-        self.sold_profit = 0
-        self.num_bought = 0
-        self.ep_step = -1
-        self.assets = []
+
         self.episode = 0
-        self.overall_reward = 0
-        for i in range(0, n_insiders):
-            self.assets.append(deque())
+        self.ep_step = -1
+        self.ep_ret = 0
+
+
         self.pre_state = []
         self.action_space = self._action_space()
         self.observation_space = self._observation_space()
 
-    def _portfolio_value(self):
-        value = 0
-        for i, asset in enumerate(self.assets):
-            value += len(asset)*self._day_price(i)
-        return value
-
-    def _full_value(self):
-        value = self._portfolio_value()
-        value += self.money
-        return value
-
-    def _day_price(self, asset):
-        return self.assets_prices[asset][self.ep_step]
+        self.taxes = 0
+        self.min_allotment = 100
+        self.shares = {}
+        for i in range(0, n_insiders):
+            self.shares[i] = {}
 
     def _observation_space(self):
-        # wallet money, portifolio value
         money_low = [0, 0, 0, 0, 0]
         money_high = [np.inf, np.inf, 1, 1, 1]
         money = spaces.Box(np.array(money_low), np.array(money_high))
-        # 0 ou 1 para cada insider
-        # insiders_preds = spaces.MultiBinary(self.n_insiders)
-        # return spaces.Tuple((money, insiders_preds))
         return money
 
     def _action_space(self):
@@ -65,56 +51,44 @@ class MarketEnv(gym.Env):
         action_high = [1, 1, 1]
         return spaces.Box(np.array(action_low), np.array(action_high))
 
-    def _pls_help(self, action, reward, done):
-        print(f"============ Episode Step {self.ep_step}")
-        print(f"Estado Previo: {self.pre_state}")
-        print(f"Acoes: {action}")
-        print(f"Estado: {self.state}")
-        print(f"Lucro atual: {self._full_value() - self.start_money}")
-        print(f"Recompensa: {reward}")
-        print(f"Done: {done}")
+    def _daily_returns(self):
+        day_ret = 0
+        for share_index in self.shares:
+            share = self.shares[share_index]
+            day_price = self._current_price(share_index)
+            for holding in share:
+                holding_amt = share[holding]
+                day_ret += (day_price - holding)*holding_amt
+        return day_ret
+
+    def _portfolio_value(self):
+        value = 0
+        for share_index in self.shares:
+            share = self.shares[share_index]
+            for holding in share:
+                value += share[holding]*self._current_price(share_index)
+        return value
+
+    def _full_value(self):
+        value = self._portfolio_value()
+        value += self.balance
+        return value
+
+    def _current_price(self, asset):
+        return self.assets_prices[asset][self.ep_step]
 
     def step(self, action):
-        """.
-
-        Parameters
-        ----------
-        action :
-
-        Returns
-        -------
-        ob, reward, episode_over, info : tuple
-            ob (object) :
-                an environment-specific object representing your observation of
-                the environment.
-            reward (float) :
-                amount of reward achieved by the previous action. The scale
-                varies between environments, but the goal is always to increase
-                your total reward.
-            episode_over (bool) :
-                whether it's time to reset the environment again. Most (but not
-                all) tasks are divided up into well-defined episodes, and done
-                being True indicates the episode has terminated. (For example,
-                perhaps the pole tipped too far, or you lost your last life.)
-            info (dict) :
-                 diagnostic information useful for debugging. It can sometimes
-                 be useful for learning (for example, it might contain the raw
-                 probabilities behind the environment's last state change).
-                 However, official evaluations of your agent are not allowed to
-                 use this for learning.
-
-        """
         self.ep_step += 1
-        scope_actions = list(action)
-        self._take_action(scope_actions)
+        action_backup = list(action)
+        self._take_action(action)
         self.state = self._make_observation()
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info()
-        # self._pls_help(action, reward, done)
+        # self._pls_help(action_backup, reward, done)
         if done is True:
-            print(f"Lucro Total: {self._full_value() - self.start_money}")
-            print(f"Overall Reward: {self.overall_reward}")
+            print(f"Lucro Total: {(self._full_value() - self.start_money):.2f}")
+            print(f"Overall Reward: {self.ep_ret:.2f}")
         self.pre_state = self.state
         return self.state, reward, done, info
 
@@ -126,51 +100,48 @@ class MarketEnv(gym.Env):
         else:
             return False
 
-    def _calc_appreciation(self):
-        apretiation = 0
-        for i, asset in enumerate(self.assets):
-            actual_price = self._day_price(i)
-            for bought_price in asset:
-                apretiation += (actual_price - bought_price)
-        return apretiation
+    def _sell_action(self, actions):
+        # sold_profit = 0
+        num_sold = 0
+        for share_index, action in enumerate(actions):
+            if action > 0.5:
+                day_price = self._current_price(share_index)
+                share = self.shares[share_index]
+                for holding in share:
+                    # sold_profit += (day_price - holding)*share[holding]
+                    num_sold += share[holding]
+                self.balance += (day_price*num_sold)
+                share.clear()
 
-    def _sell_action(self, scope_actions):
-        for i, action in enumerate(scope_actions):
-            if action > 0:
-                actual_price = self._day_price(i)
-                num_sold = 0
-                to_sell = int(len(self.assets[i]) * action)
-                while num_sold < to_sell and len(self.assets[i]) > 0:
-                    bought_price = self.assets[i].popleft()
-                    self.sold_profit += actual_price - bought_price
-                    num_sold += 1
-                self.money += (actual_price*to_sell)
-                scope_actions[i] = 0.0
+    def _buy_action(self, actions):
+        total = abs(sum(actions))
+        if total > 0:
+            money = self.balance
+            actions_normal = [abs(x) for x in actions]
+            if total > 1:
+                actions_normal = [x/total for x in actions]
+            for share_index, action in enumerate(actions_normal):
+                if action > 0:
+                    day_price = self._current_price(share_index)
 
-    def _buy_action(self, scope_actions):
-        total = sum(scope_actions)
-        if total != 0:
-            normal_actions = [x/abs(total) for x in scope_actions]
-            for i, action in enumerate(normal_actions):
-                action = abs(action)
-                actual_price = self._day_price(i)
-                to_buy = int(int(action*self.money) // actual_price)
-                self.assets[i].extend([actual_price]*to_buy)
-                self.num_bought = to_buy
-                self.money -= (actual_price*to_buy)
+                    to_buy = int(action*money // day_price)
 
-    def _take_action(self, scope_actions):
-        self.sold_profit = 0
-        self.num_bought = 0
-        # print('[GYM]', end=' ')
-        # print(scope_actions)
-        self._sell_action(scope_actions)
-        self._buy_action(scope_actions)
+                    if day_price in self.shares[share_index]:
+                        self.shares[share_index][day_price] += to_buy
+                    else:
+                        self.shares[share_index][day_price] = to_buy
+
+                    self.balance -= (day_price*to_buy)
+
+    def _take_action(self, actions):
+        self._sell_action(actions)
+        actions = [0 if x > 0 else x for x in actions]
+        self._buy_action(actions)
 
     def _make_observation(self):
         obs = np.zeros(self.observation_space.shape)
-        obs[0] = self.money  # wallet money
-        obs[1] = self._portfolio_value()  # portifolio money
+        obs[0] = self.balance
+        obs[1] = self._portfolio_value()
         for i in range(2, self.n_insiders+2):
             obs[i] = self.insiders_preds[i-2][self.ep_step]
 
@@ -178,27 +149,29 @@ class MarketEnv(gym.Env):
 
     def _get_reward(self):
         """Reward is given for XY."""
-        # buy_w = -0.5
         end_w = 5
         reward = 0
         if self._check_done():
             reward += end_w*(self._full_value() - self.start_money)
-        # reward += (self.num_bought*buy_w)
-        reward += self._calc_appreciation()
-        self.overall_reward += reward
-        # reward += self.sold_profit
-        # reward /= 10
-        return reward
+        reward += 0.5*self._daily_returns()
+        self.ep_ret += reward
+        return reward/10
 
-    def _get_info(self):
-        return {}
+    def _pls_help(self, action, reward, done):
+        print(f"============ Episode Step {self.ep_step}")
+        print(f"Estado Previo: {self.pre_state}")
+        print(f"Acoes: {action}")
+        print(f"Estado: {self.state}")
+        print(f"Saldo: {self.balance:.2f}")
+        print(f"Lucro Geral: {(self._full_value() - self.start_money):.2f}")
+        print(f"Lucro Diario: {self._daily_returns():.2f}")
+        print(f"Recompensa: {reward}")
+        print(f"Done: {done}")
 
-    def render(self, mode='human', close=False):
-        self._log_step()
 
     def _log_step(self):
         print("\nStep {}".format(self.ep_step))
-        print("\tMoney {}".format(self.money))
+        print("\tMoney {}".format(self.balance))
         for i, asset in enumerate(self.assets):
             print(f"\tASSET {i}:")
             print("\t\tNum Assets: {}".format(len(asset)))
@@ -208,14 +181,29 @@ class MarketEnv(gym.Env):
         self.ep_step = -1
         self.episode += 1
         self.pre_state = []
-        self.money = self.start_money
-        self.assets = []
-        self.overall_reward = 0
+        self.balance = self.start_money
+        self.ep_ret = 0
+        self.shares = {}
         for i in range(0, self.n_insiders):
-            self.assets.append(deque())
+            self.shares[i] = {}
+
         return self._make_observation()
 
-    # def seed(self, seed):
-    #     """Seed."""
-    #     random.seed(seed)
-    #     np.random.seed
+    def _get_info(self):
+        return {}
+
+    def render(self, mode='human', close=False):
+        self._log_step()
+
+
+if __name__ == "__main__":
+    market = MarketEnv(3, 1000, [[12.3, 13.1, 14.1], [14.2, 13.3, 12.4], [23.2, 12.2, 13.1]],
+                       [[1, 1, 0], [0, 0, 0], [0, 1, 0]])
+    market.ep_step = 0
+    market._take_action([1, -.32, -.642])
+    # market._buy_action([0, 0.5, 0.5])
+    # print(market.shares)
+    # market.ep_step = 1
+    # print(market.money)
+    # ret = market._swing_trade_return()
+    # print(ret)
