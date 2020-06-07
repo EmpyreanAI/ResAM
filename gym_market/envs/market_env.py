@@ -6,7 +6,6 @@ import numpy as np
 from gym import spaces
 from collections import deque
 
-
 class MarketEnv(gym.Env):
     """."""
 
@@ -20,10 +19,11 @@ class MarketEnv(gym.Env):
         self.assets_prices = assets_prices
         self.insiders_preds = insiders_preds
 
+        self.epoch_profit = 0
+
         self.episode = 0
         self.ep_step = -1
         self.ep_ret = 0
-        self.sold_profit = 0
 
         self.pre_state = []
         self.action_space = self._action_space()
@@ -37,8 +37,8 @@ class MarketEnv(gym.Env):
             self.shares[i] = {}
 
     def _observation_space(self):
-        money_low = [0, 0, 0, 0, 0, 0]
-        money_high = [1, np.inf, 1, np.inf, 1, np.inf]
+        money_low = [0, 0, 0, 0]
+        money_high = [np.inf, 1, 1, 1]
         money = spaces.Box(np.array(money_low), np.array(money_high))
         return money
 
@@ -86,7 +86,7 @@ class MarketEnv(gym.Env):
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info()
-        # self._log_step(False, action, reward, done)
+        # self._log_step(True, action, reward, done)
         self.pre_state = self.state
         return self.state, reward, done, info
 
@@ -146,13 +146,10 @@ class MarketEnv(gym.Env):
 
     def _make_observation(self):
         obs = np.zeros(self.observation_space.shape)
-        # obs[0] = self.balance + self._full_value()
-        obs[0] = self.insiders_preds[0][self.ep_step]
-        obs[1] = self._current_price(0)
-        obs[2] = self.insiders_preds[1][self.ep_step]
-        obs[3] = self._current_price(1)
-        obs[4] = self.insiders_preds[2][self.ep_step]
-        obs[5] = self._current_price(2)
+        obs[0] = self.balance + self._full_value()
+        obs[1] = self.insiders_preds[0][self.ep_step]/self._current_price(0)
+        obs[2] = self.insiders_preds[1][self.ep_step]/self._current_price(1)
+        obs[3] = self.insiders_preds[2][self.ep_step]/self._current_price(2)
 
         return obs
 
@@ -167,7 +164,7 @@ class MarketEnv(gym.Env):
         # reward += daily_w*self._daily_returns()
         reward += sell_w*self.sold_profit
         reward += self.taxes_reward
-        reward /= 100
+        reward /= 10
         self.ep_ret += reward
         return reward
 
