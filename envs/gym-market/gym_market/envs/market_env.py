@@ -37,8 +37,8 @@ class MarketEnv(gym.Env):
             self.shares[i] = {}
 
     def _observation_space(self):
-        money_low = [0, 0, 0, 0]
-        money_high = [np.inf, 1, 1, 1]
+        money_low = [0, 0, 0, 0, 0]
+        money_high = [np.inf, np.inf, 1, 1, 1]
         money = spaces.Box(np.array(money_low), np.array(money_high))
         return money
 
@@ -146,10 +146,11 @@ class MarketEnv(gym.Env):
 
     def _make_observation(self):
         obs = np.zeros(self.observation_space.shape)
-        obs[0] = self.balance + self._full_value()
-        obs[1] = self.insiders_preds[0][self.ep_step]/self._current_price(0)
-        obs[2] = self.insiders_preds[1][self.ep_step]/self._current_price(1)
-        obs[3] = self.insiders_preds[2][self.ep_step]/self._current_price(2)
+        obs[0] = self.balance
+        obs[1] = self._portfolio_value()
+        obs[2] = self.insiders_preds[0][self.ep_step]
+        obs[3] = self.insiders_preds[1][self.ep_step]
+        obs[4] = self.insiders_preds[2][self.ep_step]
 
         return obs
 
@@ -164,7 +165,7 @@ class MarketEnv(gym.Env):
         # reward += daily_w*self._daily_returns()
         reward += sell_w*self.sold_profit
         reward += self.taxes_reward
-        reward /= 10
+        reward /= 100
         self.ep_ret += reward
         return reward
 
