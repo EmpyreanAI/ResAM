@@ -9,7 +9,9 @@ import plotly
 import plotly.graph_objects as go
 import pandas
 from dash.dependencies import Input, Output
-import urllib.request, json 
+import urllib.request, json
+import os
+import sys
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -117,10 +119,25 @@ def graph_qval(data):
 @app.callback([Output('loss', 'figure'), Output('ep_ret', 'figure'),  Output('qval', 'figure')],
               [Input('interval', 'n_intervals')])
 def get_data(n):
-    with urllib.request.urlopen("http://localhost:5000/get_last_train") as url:
-        data = json.loads(url.read().decode())
+    progress = []
+    result = {}
+    for root, _, files in os.walk(os.path.join(sys.argv[1], 'data')):
+        for file in files:
+            if file.endswith(".txt"):
+                progress.append(os.path.join(root, file))
+
+    last_train = progress[-1]
+
+    columns = open(last_train).readlines()[0].split('\t')
+
+    for i in columns:
+        result[i] = []
+
+    for line in open(last_train).readlines()[1:]:
+        for i, value in enumerate(line.split('\t')):
+            result[columns[i]].append(float(value))
     
-    df_data = pandas.DataFrame(data)
+    df_data = pandas.DataFrame(result)
 
     return graph_loss(df_data), graph_ep_ret(df_data), graph_qval(df_data)
 
