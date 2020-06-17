@@ -1,7 +1,4 @@
 """."""
-import sys
-sys.path.append('../../')
-sys.path.append('../')
 # Necessário para importar os módulos
 import gym
 import datetime
@@ -9,7 +6,7 @@ import numpy as np
 from spinup import ddpg_tf1
 from spinup import sac_tf1
 from tensorflow import keras
-from data_mining.helpers.stock_util import StockUtil
+from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
 import tensorflow as tf
 
@@ -76,5 +73,5 @@ utiliza max ep pra encerrar."""
 eg.add('ac_kwargs:activation', tf.tanh)
 eg.add('ac_kwargs:output_activation', tf.tanh)
 eg.add('ac_kwargs:hidden_sizes', (32, 32))
-eg.run(ddpg_tf1, num_cpu=1)
+eg.run(ddpg_tf1, num_cpu=1,  data_dir='../../data')
 
