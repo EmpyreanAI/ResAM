@@ -1,6 +1,7 @@
-import argparse
 import gym
-
+import argparse
+from spinup import ddpg_tf1 as ddpg
+from spinup.utils.run_utils import setup_logger_kwargs
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env', type=str, default='Pendulum-v0')
@@ -12,10 +13,6 @@ parser.add_argument('--epochs', type=int, default=50)
 parser.add_argument('--exp_name', type=str, default='ddpg')
 args = parser.parse_args()
 
-from spinup.utils.run_utils import setup_logger_kwargs
-from spinup import ddpg_tf1 as ddpg
-# from spinup import core
-# from spinup.ddpg_tf1 import core, ddpg
 logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed)
 
 ddpg(lambda : gym.make(args.env),
