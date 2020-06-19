@@ -1,0 +1,1 @@
+![](./data/source/_static/resam.pdf)
