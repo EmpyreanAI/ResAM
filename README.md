@@ -1,1 +1,1 @@
-![](./data/source/_static/resam.pdf)
+![](./data/source/_static/resam.svg)
