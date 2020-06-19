@@ -30,6 +30,4 @@ Welcome to ResAM's documentation!
    :maxdepth: 2
    :caption: Dashboard
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Etc.
+   dashboard/dash
