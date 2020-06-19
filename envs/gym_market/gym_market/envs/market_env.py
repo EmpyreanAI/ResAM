@@ -1,4 +1,36 @@
-"""."""
+"""Example Google style docstrings.
+
+This module demonstrates documentation as specified by the `Google Python
+Style Guide`_. Docstrings may extend over multiple lines. Sections are created
+with a section header and a colon followed by a block of indented text.
+
+Example:
+    Examples can be given using either the ``Example`` or ``Examples``
+    sections. Sections support any reStructuredText formatting, including
+    literal blocks::
+
+        $ python example_google.py
+
+Section breaks are created by resuming unindented text. Section breaks
+are also implicitly created anytime a new section starts.
+
+Attributes:
+    module_level_variable1 (int): Module level variables may be documented in
+        either the ``Attributes`` section of the module docstring, or in an
+        inline docstring immediately following the variable.
+
+        Either form is acceptable, but the two should not be mixed. Choose
+        one convention to document module level variables and be consistent
+        with it.
+
+Todo:
+    * For module TODOs
+    * You have to also use ``sphinx.ext.todo`` extension
+
+.. _Google Python Style Guide:
+   http://google.github.io/styleguide/pyguide.html
+
+"""
 
 import gym
 import random
@@ -7,23 +39,43 @@ from gym import spaces
 from collections import deque
 
 class MarketEnv(gym.Env):
-    """Summary line.
+    """The summary line for a class docstring should fit on one line.
 
-    Extended description of function.
+    If the class has public attributes, they may be documented here
+    in an ``Attributes`` section and follow the same formatting as a
+    function's ``Args`` section. Alternatively, attributes may be documented
+    inline with the attribute's declaration (see __init__ method below).
 
-    Args:
-        arg1: Description of arg1
-        arg2: Description of arg2
+    Properties created with the ``@property`` decorator should be documented
+    in the property's getter method.
 
-    Returns:
-        Description of return value
+    Attributes:
+        attr1 (str): Description of `attr1`.
+        attr2 (:obj:`int`, optional): Description of `attr2`.
 
     """
 
     metadata = {'render.modes': ['human']}
 
     def __init__(self, n_insiders, start_money, assets_prices, insiders_preds):
-        """Constructor."""
+        """Example of docstring on the __init__ method.
+
+        The __init__ method may be documented in either the class level
+        docstring, or as a docstring on the __init__ method itself.
+
+        Either form is acceptable, but the two should not be mixed. Choose one
+        convention to document the __init__ method and be consistent with it.
+
+        Note:
+            Do not include the `self` parameter in the ``Args`` section.
+
+        Args:
+            param1 (str): Description of `param1`.
+            param2 (:obj:`int`, optional): Description of `param2`. Multiple
+                lines are supported.
+            param3 (:obj:`list` of :obj:`str`): Description of `param3`.
+
+        """
         self.start_money = start_money
         self.balance = start_money
         self.n_insiders = n_insiders
@@ -48,22 +100,35 @@ class MarketEnv(gym.Env):
             self.shares[i] = {}
 
     def _observation_space(self):
+        """Define the observation space of the environment.
+
+        Returns:
+            A spaces.Box() value with the observation space
+        """
         money_low = [0, 0, 0, 0, 0]
         money_high = [np.inf, np.inf, 1, 1, 1]
         money = spaces.Box(np.array(money_low), np.array(money_high))
         return money
 
     def _action_space(self):
-        """For each of the stocks.
+        """Define the action space of the environment.
 
-        - Buy 0 to -inf (e.g. 1.23 = 123% of the actual ammount)
-        - Sell 0 to 100
+        The current selected action space is a vector of values between -1 and 1 where:
+            - [-1, 0) = Buy x percentage of the available resources in this stock
+            - 0 = Do noting
+            - 1 = Sell Everything
+
+        Returns:
+            A spaces.Box() value with the action space
         """
         action_low = [-1, -1, -1]
         action_high = [1, 1, 1]
         return spaces.Box(np.array(action_low), np.array(action_high))
 
     def _daily_returns(self):
+        """.
+
+        """
         day_ret = 0
         for share_index in self.shares:
             share = self.shares[share_index]
@@ -74,6 +139,11 @@ class MarketEnv(gym.Env):
         return day_ret
 
     def _portfolio_value(self):
+        """Calculate the agents portfolio worth at the time-step.
+
+        Returns:
+            The portfolio worth.
+        """
         value = 0
         for share_index in self.shares:
             share = self.shares[share_index]
@@ -82,11 +152,31 @@ class MarketEnv(gym.Env):
         return value
 
     def _full_value(self):
+        """Get how much money the agent have in total.
+
+        The money considers the sum of the avaiable money in the balance 
+        and the value of the agent's portifolio at the given time-step.
+
+        Returns:
+            The sum of money the agent have in the balance and in its portifolio.
+
+        """
         value = self._portfolio_value()
         value += self.balance
         return value
 
     def _current_price(self, asset):
+        """Get the current price for a given asset.
+
+        The price is obtained considering the time-step of the simulation.
+
+        Args:
+            asset (int): Index of the asset in the vector to get the price
+
+        Returns:
+            The current price of the asset at a time-step.
+
+        """
         return self.assets_prices[asset][self.ep_step]
 
     def step(self, action):

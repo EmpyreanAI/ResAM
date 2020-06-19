@@ -3,4 +3,4 @@ dash==1.12.0
 -e git+https://github.com/EmpyreanAI/B3Data#egg=b3data
 -e git+https://github.com/openai/spinningup#egg=spinup
 gym
--e ./envs/gym-market
+-e ./envs/gym_market
