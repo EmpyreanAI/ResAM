@@ -1,1 +1,1 @@
-![](./data/source/_static/resam.svg)
+![](./docs/source/_static/resam.svg)
