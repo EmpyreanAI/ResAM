@@ -63,7 +63,7 @@ html_theme_options = {
     'display_version': True
 }
 
-autodoc_mock_imports = ["b3data", "tensorflow"]
+autodoc_mock_imports = ["b3data", "tensorflow", "spinup"]
 
 def setup(app):
     app.add_css_file('css/modify.css')
