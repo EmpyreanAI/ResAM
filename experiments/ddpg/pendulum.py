@@ -1,3 +1,35 @@
+""" The experimenter script for the Pendulum Environment.
+
+In this experiment is used `OpenAI's gym`_, with the `Pendulum environment`_,
+together with `OpenAI's Spinning Up`_ DDPG Algorithm, to train and test a DDPG agent
+to balance a Pendulum.
+
+**Why is this here?**
+
+    The pendulum environment is used to test the performance of the DDPG and compare
+    with the ResAM Env.
+
+Note:
+    This experiment is not a notebook due to the complexity and time consume of the experiments.
+
+
+Execution::
+
+    $ python pendulum.py
+    $ python pendulum.py --help
+
+.. _OpenAI's gym:
+  https://gym.openai.com
+
+.. _OpenAI's Spinning Up:
+  https://spinningup.openai.com/
+
+.. _Pendulum environment:
+  https://gym.openai.com/envs/Pendulum-v0/
+
+
+"""
+
 import gym
 import argparse
 from spinup import ddpg_tf1 as ddpg

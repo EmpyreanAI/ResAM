@@ -2,6 +2,6 @@
 DDPG Pendulum
 =============
 
-.. automodule:: models.ddpg.pendulum
+.. automodule:: experiments.ddpg.pendulum
     :members:
     :private-members:

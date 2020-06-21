@@ -6,6 +6,8 @@
 Welcome to ResAM's documentation!
 =================================
 
+.. image:: _static/resam.svg
+
 .. toctree::
    :maxdepth: 2
    :caption: User Documentation
@@ -21,10 +23,10 @@ Welcome to ResAM's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Models
+   :caption: Experiments
 
-   models/pendulum
-   models/market
+   experiments/pendulum
+   experiments/market
 
 .. toctree::
    :maxdepth: 2

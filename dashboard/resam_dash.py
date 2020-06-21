@@ -1,17 +1,27 @@
+""" Dashboard for visualizing experiments.
+
+Note:
+    Under mantaince, need refactor.
+
+Execution::
+
+    $ python dash.py
+
+"""
+
+import os
+import sys
+import plotly
+import pandas
 import datetime
+import urllib.request, json
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table as dt
-
-import plotly
-import plotly.graph_objects as go
-import pandas
 from dash.dependencies import Input, Output
-import urllib.request, json
-import os
-import sys
+
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -116,12 +126,13 @@ def graph_qval(data):
 
     return fig
 
+
 @app.callback([Output('loss', 'figure'), Output('ep_ret', 'figure'),  Output('qval', 'figure')],
               [Input('interval', 'n_intervals')])
 def get_data(n):
     progress = []
     result = {}
-    for root, _, files in os.walk(os.path.join(sys.argv[1], 'data')):
+    for root, _, files in os.walk(os.path.join("../", 'data')):
         for file in files:
             if file.endswith(".txt"):
                 progress.append(os.path.join(root, file))

@@ -92,6 +92,7 @@ class MarketEnv(gym.Env):
         """Define the action space of the environment.
 
         The current selected action space is a vector of values between -1 and 1 where:
+
             - [-1, 0) = Buy x percentage of the available resources in this stock;
             - 0 = Do noting;
             - 1 = Sell Everything.
@@ -277,11 +278,13 @@ class MarketEnv(gym.Env):
             All agent's profits and expenses are updated in this function. 
             
             On buying:
+
                 - Taxes are paid;
                 - Money is decreased;
                 - Asset is accounted to the portfolio.
             
             On sell:
+
                 - Taxes are paid;
                 - Money is increased;
                 - Asset is removed from the portfolio.
@@ -301,6 +304,7 @@ class MarketEnv(gym.Env):
         """Make observations about the env.
 
         Observatios contains:
+        
             - Balance;
             - Portifolio Value;
             - Prediction for each asset.

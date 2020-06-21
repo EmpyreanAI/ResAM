@@ -130,7 +130,6 @@ background-color: var(--color--warmgraylight) !important;
 .rst-content dl:not(.docutils) dt:not(.field-odd) {
 border-color: var(--color--brightred) !important;
 background-color: var(--color--warmgraylight) !important;
-margin-left: 5pt !important;
 }
 
 /* .rst-content pre.literal-block, .rst-content div[class^='highlight'] {
