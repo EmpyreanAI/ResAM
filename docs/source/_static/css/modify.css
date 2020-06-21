@@ -127,7 +127,7 @@ background-color: var(--color--brightred) !important;
 background-color: var(--color--warmgraylight) !important;
 }
 
-.rst-content dl:not(.docutils) dt:not(.field-odd) {
+.rst-content dl:not(.docutils) dt:not(.field-odd):not(.field-even) {
 border-color: var(--color--brightred) !important;
 background-color: var(--color--warmgraylight) !important;
 }
