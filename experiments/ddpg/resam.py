@@ -33,7 +33,7 @@ Execution::
 """
 import gym
 import tensorflow as tf
-from spinup import ddpg_tf1
+from spinup import ddpg_tf1, ppo_tf1, td3_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
 
@@ -55,7 +55,7 @@ def env_fn():
                                         end_year=2014, period=11)
 
 
-    return gym.make('MarketEnv-v0', n_insiders=3, start_money=10000,
+    return gym.make('MarketEnv-v0', n_insiders=1, start_money=10000,
                     assets_prices=prices, insiders_preds=preds)
 
 
@@ -112,25 +112,25 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', 3853)
+    eg.add('seed', 7)
     # eg.add('steps_per_epoch', 5000)
-    # eg.add('epochxs', 20000)
+    # eg.add('epochs', 1000)
     # eg.add('replay_size', int(1e8))
-    # eg.add('gamma', 0.99)
+    eg.add('gamma', 0.8)
     # eg.add('polyak', 0.995)
-    # eg.add('pi_lr', 0.0001)
-    # eg.add('q_lr', 0.0001)
+    eg.add('pi_lr', 0.000001)
+    eg.add('q_lr', 0.000001)
     # eg.add('batch_size', 9)
-    # eg.add('start_steps', 40000)    
-    # eg.add('update_after', 1000)
-    # eg.add('update_every', 30)
-    eg.add('act_noise', 10)
+    # eg.add('start_steps', 100000)    
+    # eg.add('update_after', 2000)
+    # eg.add('update_every', 10)
+    # eg.add('act_noise', 1)
     # eg.add('num_test_episodes', 10)
     # eg.add('max_ep_len', 1000)
     # eg.add('save_freq', 3)
     eg.add('ac_kwargs:activation', tf.tanh)
     eg.add('ac_kwargs:output_activation', tf.tanh)
-    eg.add('ac_kwargs:hidden_sizes', (32, 32))
+    # eg.add('ac_kwargs:hidden_sizes', (1024, 1024))
 
     return eg
 

@@ -21,8 +21,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-
-
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -30,6 +28,8 @@ app.layout = html.Div(
     html.Div([
         html.H4('B3 Resource Allocation Manager'),
         html.Div(id='live-update-text'),
+        dcc.Graph(id='testprofit'),
+        dcc.Graph(id='profit'),
         dcc.Graph(id='loss'),
         dcc.Graph(id='ep_ret'),
         dcc.Graph(id='qval'),
@@ -40,6 +40,60 @@ app.layout = html.Div(
         )
     ])
 )
+
+
+def graph_testprofit(data):
+    fig = plotly.tools.make_subplots(rows=1, cols=1)
+    fig['layout']['margin'] = {
+        'l': 30, 'r': 10, 'b': 30, 't': 10
+    }
+    fig['layout']['legend'] = {'x': 1, 'y': 1, 'xanchor': 'right'}
+    fig['layout']['height'] = 250
+
+    fig.append_trace({
+        'x': data['Epoch'],
+        'y': data['TestEpProfit'],
+        'name': 'TestEpProfit',
+        'mode': 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+
+    return fig
+   
+
+def graph_profit(data):
+    fig = plotly.tools.make_subplots(rows=1, cols=1)
+    fig['layout']['margin'] = {
+        'l': 30, 'r': 10, 'b': 30, 't': 10
+    }
+    fig['layout']['legend'] = {'x': 1, 'y': 1, 'xanchor': 'right'}
+    fig['layout']['height'] = 250
+
+    fig.append_trace({
+        'x': data['Epoch'],
+        'y': data['AverageEpProfit'],
+        'name': 'AverageEpProfit',
+        'mode': 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+
+    fig.append_trace({
+        'x': data['Epoch'],
+        'y': data['MaxEpProfit'],
+        'name': 'MaxEpProfit',
+        'mode': 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+
+    fig.append_trace({
+        'x': data['Epoch'],
+        'y': data['MinEpProfit'],
+        'name': 'MinEpProfit',
+        'mode': 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+   
+    return fig
 
 def graph_loss(data):
     fig = plotly.tools.make_subplots(rows=1, cols=1)
@@ -127,7 +181,8 @@ def graph_qval(data):
     return fig
 
 
-@app.callback([Output('loss', 'figure'), Output('ep_ret', 'figure'),  Output('qval', 'figure')],
+@app.callback([Output('profit', 'figure'), Output('testprofit', 'figure'), Output('loss', 'figure'),
+               Output('ep_ret', 'figure'), Output('qval', 'figure')],
               [Input('interval', 'n_intervals')])
 def get_data(n):
     progress = []
@@ -150,7 +205,7 @@ def get_data(n):
     
     df_data = pandas.DataFrame(result)
 
-    return graph_loss(df_data), graph_ep_ret(df_data), graph_qval(df_data)
+    return  graph_profit(df_data), graph_testprofit(df_data), graph_loss(df_data), graph_ep_ret(df_data), graph_qval(df_data)
 
 
 if __name__ == '__main__':

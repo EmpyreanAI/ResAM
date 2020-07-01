@@ -83,8 +83,8 @@ class MarketEnv(gym.Env):
             A spaces.Box() value with the observation space.
 
         """
-        money_low = [0, 0, 0, 0, 0]
-        money_high = [np.inf, np.inf, 1, 1, 1]
+        money_low = [0, 0, 0, 0]
+        money_high = [np.inf, np.inf, 1, np.inf]
         money = spaces.Box(np.array(money_low), np.array(money_high))
         return money
 
@@ -100,8 +100,8 @@ class MarketEnv(gym.Env):
         Returns:
             A spaces.Box() value with the action space.
         """
-        action_low = [-1, -1, -1]
-        action_high = [1, 1, 1]
+        action_low = [-1]
+        action_high = [1]
         return spaces.Box(np.array(action_low), np.array(action_high))
 
     def _daily_returns(self):
@@ -188,8 +188,8 @@ class MarketEnv(gym.Env):
         self.state = self._make_observation()
         reward = self._get_reward()
         done = self._check_done()
-        info = self._get_info()
-        # self._log_step(True, action, reward, done)
+        info = self._get_info(action)
+        self._log_step(False, action, reward, done)
         self.pre_state = self.state
         return self.state, reward, done, info
 
@@ -317,8 +317,9 @@ class MarketEnv(gym.Env):
         obs[0] = self.balance
         obs[1] = self._portfolio_value()
         obs[2] = self.insiders_preds[0][self.ep_step]
-        obs[3] = self.insiders_preds[1][self.ep_step]
-        obs[4] = self.insiders_preds[2][self.ep_step]
+        obs[3] = self.assets_prices[0][self.ep_step]
+        # obs[3] = self.insiders_preds[1][self.ep_step]
+        # obs[4] = self.insiders_preds[2][self.ep_step]
 
         return obs
 
@@ -335,16 +336,15 @@ class MarketEnv(gym.Env):
         Returns:
             The reward for the step.
         """
-        end_w = 10
-        daily_w = 1
-        sell_w = 1
         reward = 0
+        end_w = 5
+        sell_w = 2
+        reward += 0.5*self._daily_returns()
         if self._check_done():
                 reward += end_w*(self._full_value() - self.start_money)
-        # reward += daily_w*self._daily_returns()
         reward += sell_w*self.sold_profit
         reward += self.taxes_reward
-        reward /= 100
+        reward /= 1000
         self.ep_ret += reward
         return reward
 
@@ -393,14 +393,26 @@ class MarketEnv(gym.Env):
 
         return self._make_observation()
 
-    def _get_info(self):
+    def _get_info(self, actions):
         """Get Info.
         
         Needed to overwrite to work with gym. For more information check 
         the gym documentation.
 
         """
-        return {}
+        sell = 0
+        buy = 0
+        hold = 0
+        for action in actions:
+            if action == 1:
+                sell += 1
+            if action == 0:
+                hold += 1
+            if action < 0:
+                buy += 1
+
+        return {'profit': self._full_value() - self.start_money,
+                'sell': sell, 'buy': buy, 'hold': hold}
 
     def render(self, mode='human', close=False):
         """Renders the environment.
@@ -409,4 +421,4 @@ class MarketEnv(gym.Env):
         the gym documentation.
         
         """
-        self._log_step()
+        # self._log_step(False, [], [], done)
