@@ -14,8 +14,6 @@ All the data provided to the market is fetched from `EmpyreanAI's B3Data`_.
 Note:
     This experiment is not a notebook due to the complexity and time consume of the experiments.
 
-
-
 Execution::
 
     $ python resam.py
@@ -50,8 +48,8 @@ def env_fn():
     import gym_market
 
     stockutil = StockUtil(['PETR3', 'VALE3', 'ABEV3'], [6, 6, 9])
-    prices, preds = stockutil.prices_preds(start_year=2014,
-                                           end_year=2014, period=11)
+    prices, preds = stockutil.prices_preds(start_year=2014, end_year=2014,
+                                          period=11)
 
 
     return gym.make('MarketEnv-v0', n_insiders=1, start_money=10000,
@@ -116,7 +114,7 @@ def create_exp_grid(name):
     eg.add('pi_lr', 0.000000001) #000001
     eg.add('q_lr', 0.00000001)
     # eg.add('batch_size', 16)
-    eg.add('start_steps', 100000)    
+    eg.add('start_steps', 100000) # MUUUUITO IMPORTANTE
     # eg.add('update_after', 2000)
     eg.add('update_every', 1000)
     # eg.add('act_noise', 1)
