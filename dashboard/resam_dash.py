@@ -87,7 +87,6 @@ app.layout = html.Div([
     )
 ])
 
-
 def graph_testprofit(data):
     fig = plotly.tools.make_subplots(rows=1, cols=1)
     fig['layout']['margin'] = {
