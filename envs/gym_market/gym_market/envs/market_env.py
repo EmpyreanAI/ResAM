@@ -339,7 +339,7 @@ class MarketEnv(gym.Env):
         reward = 0
         end_w = 5
         sell_w = 2
-        reward += 0.5*self._daily_returns()
+        # reward += 0.5*self._daily_returns()
         if self._check_done():
                 reward += end_w*(self._full_value() - self.start_money)
         reward += sell_w*self.sold_profit
