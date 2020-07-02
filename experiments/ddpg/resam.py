@@ -50,7 +50,7 @@ def env_fn():
     import gym_market
 
 
-    stockutil = StockUtil(['PETR3', 'VALE3', 'ABEV3'], [6,6, 9])
+    stockutil = StockUtil(['PETR3', 'VALE3', 'ABEV3'], [6, 6, 9])
     prices, preds = stockutil.prices_preds(start_year=2014,
                                         end_year=2014, period=11)
 
@@ -99,10 +99,6 @@ def create_exp_grid(name):
 
         - save_freq (int): Frequency in which the model is saved to a file. Defaults to 1.
 
-        - ac_kwargs:activation (tf): Activation function of the hidden states for the actor-critic neural network. Defaults to tf.nn.relu.
-
-        - ac_kwargs:output_activation (tf): Activation function of the output state for the actor-critic neural network. Defaults to tf.tanh.
- 
         - ac_kwargs:hidden_sizes ((int,int)): Ammount of hidden states for the actor-critic neural network. Defaults to (256,256).
 
     Returns:
@@ -114,22 +110,20 @@ def create_exp_grid(name):
     eg.add('env_fn', env_fn)
     eg.add('seed', 7)
     # eg.add('steps_per_epoch', 5000)
-    # eg.add('epochs', 1000)
+    eg.add('epochs', 10)
     # eg.add('replay_size', int(1e8))
-    eg.add('gamma', 0.8)
+    eg.add('gamma', [0.8, 0.5])
     # eg.add('polyak', 0.995)
-    eg.add('pi_lr', 0.000001)
-    eg.add('q_lr', 0.000001)
-    # eg.add('batch_size', 9)
-    # eg.add('start_steps', 100000)    
+    eg.add('pi_lr', 0.000000001) #000001
+    eg.add('q_lr', 0.00000001)
+    # eg.add('batch_size', 16)
+    eg.add('start_steps', 100000)    
     # eg.add('update_after', 2000)
-    # eg.add('update_every', 10)
+    eg.add('update_every', 1000)
     # eg.add('act_noise', 1)
     # eg.add('num_test_episodes', 10)
     # eg.add('max_ep_len', 1000)
     # eg.add('save_freq', 3)
-    eg.add('ac_kwargs:activation', tf.tanh)
-    eg.add('ac_kwargs:output_activation', tf.tanh)
     # eg.add('ac_kwargs:hidden_sizes', (1024, 1024))
 
     return eg
