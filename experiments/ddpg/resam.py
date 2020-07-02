@@ -36,7 +36,7 @@ import tensorflow as tf
 from spinup import ddpg_tf1, ppo_tf1, td3_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
-
+from datetime import datetime
 
 def env_fn():
     """Create the MarketEnv environment function.
@@ -50,9 +50,9 @@ def env_fn():
     import gym_market
 
 
-    stockutil = StockUtil(['PETR3', 'VALE3', 'ABEV3'], [6,6, 9])
+    stockutil = StockUtil(['PETR3', 'VALE3', 'ABEV3'], [6,6,9])
     prices, preds = stockutil.prices_preds(start_year=2014,
-                                        end_year=2014, period=11)
+                                           end_year=2014, period=11)
 
 
     return gym.make('MarketEnv-v0', n_insiders=1, start_money=10000,
@@ -128,8 +128,8 @@ def create_exp_grid(name):
     # eg.add('num_test_episodes', 10)
     # eg.add('max_ep_len', 1000)
     # eg.add('save_freq', 3)
-    eg.add('ac_kwargs:activation', tf.tanh)
-    eg.add('ac_kwargs:output_activation', tf.tanh)
+    # eg.add('ac_kwargs:activation', tf.tanh)
+    # eg.add('ac_kwargs:output_activation', tf.tanh)
     # eg.add('ac_kwargs:hidden_sizes', (1024, 1024))
 
     return eg
@@ -142,14 +142,10 @@ def run_exp(experiment, cpus=1):
         cpus (int, optional): Ammount of cpus for the experiment. Defaults to 1.
     
     """
-    experiment.run(ddpg_tf1, num_cpu=cpus,  data_dir='../../data')
+    now = datetime.now().strftime("%d-%m-%Y-%H:%M:%S")
+    experiment.run(ddpg_tf1, num_cpu=cpus,  data_dir='../../data/' + now)
     
 
 if __name__ == '__main__':
     exp = create_exp_grid("MarketDDPG")
     run_exp(exp)
-    
-   
-
-    
-

@@ -19,28 +19,41 @@ import urllib.request, json
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+def get_first_dir():
+    base = '../data/'
+    in_data = os.listdir(base)
+    for dir in in_data:
+        if os.path.isdir(base + dir):
+            return base+dir
+    
+li_list = []
+for li in range(14):
+    li_list.append(html.Li(id='config-' + str(li)))
+
 app.layout = html.Div([
     html.Img(src='assets/resam.svg', width='30%'),
     
     html.Div([
         html.Div(
-            
+            html.Ul(li_list[:7]),
+            style={"width":"50%", "float": "left"}
         ),
         html.Div(
-            html.Ul(
-                # html.Li("Khalil Gay")
-            )
+            html.Ul(li_list[7:]),
+            style={"width":"50%", "float": "right"}
         )
-    ]),
-
-
-    
-
+    ], style={"margin": "auto"}),
+    dcc.Dropdown(
+        id='dropdown',
+        options=[],
+        value=get_first_dir()
+    ),
     html.Div([
         html.Div(
             dcc.Graph(
@@ -315,14 +328,61 @@ def graph_buysellhold(data):
 
     return fig
 
+@app.callback([Output('dropdown', 'options')],
+              [Input('interval', 'n_intervals')])
+def get_data_dirs(n):
+    base = '../data/'
+    in_data = os.listdir(base)
+    dir_list = []
+    for dir in in_data:
+        if os.path.isdir(base + dir):
+            dir_list.append({'label': dir, 'value': base+dir})
+
+    return [dir_list]
+
+output_list = []
+for output in range(14):
+    output_list.append(Output('config-' + str(output), 'children'))
+
+@app.callback(output_list,
+              [Input('dropdown', 'value')])
+def config_list(value):
+    for root, _, files in os.walk(value):
+        for file in files:
+            if file.endswith(".json"):
+                config_file = os.path.join(root, file)
+    
+    with open(config_file) as json_file:
+        data = json.load(json_file)
+
+    res = []
+
+    res.append("Nome do Experimento: " + data['logger_kwargs']['exp_name'])
+    res.append("Gamma: " + str(data['gamma']))
+    res.append("Max_ep_len:" + str(data["max_ep_len"]))
+    res.append("Num_test_episodes: " + str(data["num_test_episodes"]))
+    res.append("Pi_lr: " + str(data["pi_lr"]))
+    res.append("Polyak: " + str(data["polyak"]))
+    res.append("Num_test_episodes: " + str(data["q_lr"]))
+    res.append("Replay_size: " + str(data["replay_size"]))
+    res.append("Save_freq: " + str(data["save_freq"]))
+    res.append("Seed: " + str(data["seed"]))
+    res.append("Start_steps: " + str(data["start_steps"]))
+    res.append("Steps_per_epoch: " + str(data["steps_per_epoch"]))
+    res.append("Update_after: " + str(data["update_after"]))
+    res.append("Update_every: " + str(data["update_every"]))
+
+    return res
+
 
 @app.callback([Output('profit', 'figure'), Output('testprofit', 'figure'), Output('loss', 'figure'),
                Output('ep_ret', 'figure'), Output('qval', 'figure'), Output('buysellhold', 'figure')],
-              [Input('interval', 'n_intervals')])
-def get_data(n):
+              [Input('interval', 'n_intervals'),
+               Input('dropdown', 'value')])
+def get_data(n, value):
     progress = []
     result = {}
-    for root, _, files in os.walk(os.path.join("../", 'data')):
+    for root, _, files in os.walk(value):
         for file in files:
             if file.endswith(".txt"):
                 progress.append(os.path.join(root, file))
