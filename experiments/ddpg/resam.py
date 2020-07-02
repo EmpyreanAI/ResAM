@@ -116,7 +116,7 @@ def create_exp_grid(name):
     # eg.add('steps_per_epoch', 5000)
     # eg.add('epochs', 1000)
     # eg.add('replay_size', int(1e8))
-    eg.add('gamma', 0.8)
+    eg.add('gamma', 0.5)
     # eg.add('polyak', 0.995)
     eg.add('pi_lr', 0.000001)
     eg.add('q_lr', 0.000001)
