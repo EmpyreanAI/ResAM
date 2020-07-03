@@ -47,13 +47,21 @@ def env_fn():
     """
     import gym_market
 
-    stockutil = StockUtil(['PETR3', 'VALE3', 'ABEV3'], [6, 6, 9])
+    stockutil = StockUtil(['PETR3'], [6]) # 'VALE3', 'ABEV3' , 6, 9
     prices, preds = stockutil.prices_preds(start_year=2014, end_year=2014,
                                           period=11)
 
+    configs = {
+        's_money': 10000,
+        'taxes': 0.0,
+        'allotment': 100,
+        'price_obs': True,
+        'reward': 'full',
+        'log': 'done'
+    }
 
-    return gym.make('MarketEnv-v0', n_insiders=1, start_money=10000,
-                    assets_prices=prices, insiders_preds=preds)
+    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, configs=configs)
+
 
 
 def create_exp_grid(name):

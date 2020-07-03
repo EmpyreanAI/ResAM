@@ -52,28 +52,45 @@ class MarketEnv(gym.Env):
 
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, n_insiders, start_money, assets_prices, insiders_preds):
-        self.start_money = start_money
-        self.balance = start_money
-        self.n_insiders = n_insiders
+    _def_configs = {
+        's_money': 10000,
+        'taxes': 0.0,
+        'allotment': 100,
+        'price_obs': True,
+        'reward': 'full',
+        'log': 'done_only'
+    }
+
+
+    def __init__(self, assets_prices, insiders_preds, configs=_def_configs):
+       
+        # Configs
+        self.start_money = configs['s_money']
+        self.taxes = configs['taxes']
+        self.min_allotment = configs['allotment']
+        self.price_obs = configs['price_obs']
+        self.reward_type = configs['reward']
+        self.log = configs['log']
+
+        self.n_insiders = len(assets_prices)
         self.assets_prices = assets_prices
         self.insiders_preds = insiders_preds
 
+        self.full_taxes = 0
         self.epoch_profit = 0
-
-        self.episode = 0
-        self.ep_step = -1
         self.ep_ret = 0
-
         self.pre_state = []
+
+        # Gym Required Variablies
         self.action_space = self._action_space()
         self.observation_space = self._observation_space()
+        self.episode = 0
+        self.ep_step = -1
 
-        self.full_taxes = 0
-        self.taxes = 0
-        self.min_allotment = 100
+        # Agents Values
+        self.balance = configs['s_money']
         self.shares = {}
-        for i in range(0, n_insiders):
+        for i in range(0, self.n_insiders):
             self.shares[i] = {}
 
     def _observation_space(self):
@@ -83,10 +100,24 @@ class MarketEnv(gym.Env):
             A spaces.Box() value with the observation space.
 
         """
-        money_low = [0, 0, 0, 0]
-        money_high = [np.inf, np.inf, 1, np.inf]
-        money = spaces.Box(np.array(money_low), np.array(money_high))
-        return money
+        money_low = [0, 0]
+        money_high = [np.inf, np.inf]
+
+        insider_low = []
+        insider_high = []
+
+        for _ in range(0, self.n_insiders):
+            insider_low.append(0)
+            insider_high.append(1)
+            if self.price_obs:
+                insider_low.append(0)
+                insider_high.append(np.inf)
+
+
+        obs_low = money_low + insider_low
+        obs_high = money_high + insider_high
+        obs = spaces.Box(np.array(obs_low), np.array(obs_high))
+        return obs
 
     def _action_space(self):
         """Define the action space of the environment.
@@ -100,8 +131,8 @@ class MarketEnv(gym.Env):
         Returns:
             A spaces.Box() value with the action space.
         """
-        action_low = [-1]
-        action_high = [1]
+        action_low = [-1]*self.n_insiders
+        action_high = [1]*self.n_insiders
         return spaces.Box(np.array(action_low), np.array(action_high))
 
     def _daily_returns(self):
@@ -189,7 +220,7 @@ class MarketEnv(gym.Env):
         reward = self._get_reward()
         done = self._check_done()
         info = self._get_info(action)
-        self._log_step(False, action, reward, done)
+        self._log_step(action, reward, done)
         self.pre_state = self.state
         return self.state, reward, done, info
 
@@ -314,14 +345,21 @@ class MarketEnv(gym.Env):
 
         """
         obs = np.zeros(self.observation_space.shape)
-        obs[0] = self.balance
-        obs[1] = self._portfolio_value()
-        obs[2] = self.insiders_preds[0][self.ep_step]
-        obs[3] = self.assets_prices[0][self.ep_step]
-        # obs[3] = self.insiders_preds[1][self.ep_step]
-        # obs[4] = self.insiders_preds[2][self.ep_step]
 
-        return obs
+        wallet = [self.balance, self._portfolio_value()]
+
+        insiders = []
+        for i in range(0, self.n_insiders):
+            pred = self.insiders_preds[i][self.ep_step]
+            insiders.append(pred)
+            if self.price_obs:
+                value = self.assets_prices[i][self.ep_step]
+                insiders.append(value)
+                
+
+        obs = wallet + insiders
+
+        return np.array(obs)
 
     def _get_reward(self):
         """Calculate the reward for the step.
@@ -337,18 +375,32 @@ class MarketEnv(gym.Env):
             The reward for the step.
         """
         reward = 0
+
         end_w = 5
         sell_w = 2
-        reward += 0.3*self._daily_returns()
+        daily_w = 0.3
+
+        if self.reward_type not in ['full', 'sell_only', 'daily_only']:
+            raise NotImplementedError
+
+        # Variable rewards
+        if self.reward_type in ['full', 'daily_only']:
+            reward += daily_w*self._daily_returns()
+
+        if self.reward_type in ['full', 'sell_only']:
+            reward += sell_w*self.sold_profit
+
+        # Necessary Rewards
         if self._check_done():
                 reward += end_w*(self._full_value() - self.start_money)
-        reward += sell_w*self.sold_profit
         reward += self.taxes_reward
         reward /= 1000
+
         self.ep_ret += reward
+
         return reward
 
-    def _log_step(self, log_all, action, reward, done):
+    def _log_step(self, action, reward, done):
         """Log every step or the episode.
 
         Args:
@@ -358,7 +410,10 @@ class MarketEnv(gym.Env):
             done (bool): Indicate if is the end of the episode
          
         """
-        if log_all is True:
+        if self.log not in ['all', 'done', 'none']:
+            raise NotImplementedError
+
+        if self.log == 'all':
             print(f"============ Episode Step {self.ep_step}")
             print(f"Estado Previo: {self.pre_state}")
             print(f"Acoes: {action}")
@@ -371,9 +426,11 @@ class MarketEnv(gym.Env):
             print(f"Valor da Carteira: {self._full_value():.2f}")
             print(f"Recompensa: {reward}")
             print(f"Done: {done}")
-        if done is True:
-            print(f"Lucro Total: {(self._full_value() - self.start_money):.2f}")
-            print(f"Overall Reward: {self.ep_ret:.2f}")
+
+        if self.log in ['all', 'done']:
+            if done:
+                print(f"Lucro Total: {(self._full_value() - self.start_money):.2f}")
+                print(f"Overall Reward: {self.ep_ret:.2f}")
 
     def reset(self):
         """Resets the state of the environment and returns an initial observation.
