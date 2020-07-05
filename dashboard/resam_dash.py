@@ -21,7 +21,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css', 'assets/modify.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -30,74 +30,105 @@ def get_first_dir():
     in_data = os.listdir(base)
     for dir in in_data:
         if os.path.isdir(base + dir):
-            return base+dir
+            return base+dir 
+    return []
+
+
+hidden_style = dict()
+@app.callback(Output('content_div', 'style'),
+              [Input('dropdown', 'value')])
+def check_hidden(value):
+    if value == []:
+        return dict(display='none', width='100%')
+    else:
+        return dict(width='100%')
+
+
+td_list_columns = []
+td_list_values = []
+for td in range(20):
+    td_list_columns.append(html.Th(id='config_col-' + str(td)))
+    td_list_values.append(html.Td(id='config_val-' + str(td)))
     
-li_list = []
-for li in range(14):
-    li_list.append(html.Li(id='config-' + str(li)))
 
 app.layout = html.Div([
-    html.Img(src='assets/resam.svg', width='30%'),
     
     html.Div([
         html.Div(
-            html.Ul(li_list[:7]),
-            style={"width":"50%", "float": "left"}
+            html.Img(src='assets/resam.svg', width='60%'),
+            style={"width":"40%", "float": "left"}
         ),
-        html.Div(
-            html.Ul(li_list[7:]),
-            style={"width":"50%", "float": "right"}
-        )
-    ], style={"margin": "auto"}),
-    dcc.Dropdown(
-        id='dropdown',
-        options=[],
-        value=get_first_dir()
-    ),
-    html.Div([
-        html.Div(
-            dcc.Graph(
-                id='ep_ret', style={'width': '800'}
-            ), style={'display': 'inline-block'}
-        ),
-        html.Div(
-            dcc.Graph(
-                id='buysellhold', style={'width': '800'}
-            ), style={'display': 'inline-block'}
-        )
-    ]),
+        html.Div([
+            html.H6("Selecione o Experimento:"),
+            dcc.Dropdown(
+                id='dropdown',
+                options=[],
+                value=get_first_dir()
+            )
+        ], style={"width":"60%", "float": "right"})
+    ], style={"height":"100pt"}),
 
     html.Div([
-        html.Div(
-            dcc.Graph(
-                id='testprofit', style={'width': '800'}
-            ), style={'display': 'inline-block'}
+        dcc.Interval(
+            id='interval',
+            interval=10000,
+            n_intervals=0
         ),
-        html.Div(
-            dcc.Graph(
-                id='profit', style={'width': '800'}
-            ), style={'display': 'inline-block'}
-        )
-    ]),
+        html.Div([
+            html.Div(
+                html.Table([
+                    html.Tr(td_list_columns[:10]),
+                    html.Tr(td_list_values[:10])
+                ], style={"width":"100%"}),
+            style={"width":"100%", "height":"100pt", "display": "inline-block"}),
+            html.Div(
+                html.Table([
+                    html.Tr(td_list_columns[10:]),
+                    html.Tr(td_list_values[10:])
+                ], style={"width":"100%"}),
+            style={"width":"100%", "height":"100pt", "display": "inline-block"})
+        ]),
 
-    html.Div([
-        html.Div(
-            dcc.Graph(
-                id='qval', style={'width': '800'}
-            ), style={'display': 'inline-block'}
-        ),
-        html.Div(
-            dcc.Graph(
-                id='loss', style={'width': '800'}
-            ), style={'display': 'inline-block'}
-        )
-    ]),
+        html.Div([
+            html.Div(
+                dcc.Graph(
+                    id='ep_ret', style={'width': '800'}
+                ), style={'display': 'inline-block'}
+            ),
+            html.Div(
+                dcc.Graph(
+                    id='buysellhold', style={'width': '800'}
+                ), style={'display': 'inline-block'}
+            )
+        ]),
 
-    dcc.Interval(
-        id='interval',
-        interval=10000,
-        n_intervals=0
-    )
+        html.Div([
+            html.Div(
+                dcc.Graph(
+                    id='testprofit', style={'width': '800'}
+                ), style={'display': 'inline-block'}
+            ),
+            html.Div(
+                dcc.Graph(
+                    id='profit', style={'width': '800'}
+                ), style={'display': 'inline-block'}
+            )
+        ]),
+
+        html.Div([
+            html.Div(
+                dcc.Graph(
+                    id='qval', style={'width': '800'}
+                ), style={'display': 'inline-block'}
+            ),
+            html.Div(
+                dcc.Graph(
+                    id='loss', style={'width': '800'}
+                ), style={'display': 'inline-block'}
+            )
+        ])
+    ],id='content_div')
+    
 ])
 
 def graph_testprofit(data):
@@ -334,19 +365,38 @@ def get_data_dirs(n):
     base = '../data/'
     in_data = os.listdir(base)
     dir_list = []
-    for dir in in_data:
-        if os.path.isdir(base + dir):
-            dir_list.append({'label': dir, 'value': base+dir})
+
+    for root, _, files in os.walk(base):
+        if len(root.split('/')) == 5:
+            label = root.split('/')
+            label = f"{label[2]}/{label[3]}/{label[4]}"
+            dir_list.append({'label':label, 'value':root})
 
     return [dir_list]
 
-output_list = []
-for output in range(14):
-    output_list.append(Output('config-' + str(output), 'children'))
 
-@app.callback(output_list,
+output_columns = []
+output_values = []
+for output in range(20):
+    output_columns.append(Output('config_col-' + str(output), 'children'))
+    output_values.append(Output('config_val-' + str(output), 'children'))
+
+
+@app.callback(output_columns,
               [Input('dropdown', 'value')])
-def config_list(value):
+def config_list_columns(value):
+
+    columns = ["Stocks and Year", "Dinheiro Inicial", "Taxas", "Lotes", "Obs Preço", "Recompensa",
+               "Seed" ,"Épocas", "Passos por Época",
+               "Start Steps", "Update After", "Update Every", "Batch Size",
+               "Gamma", "Learning Rate Q", "Learning Rate Pi", "Polyak", "Replay Buffer Size",
+               "Act Noise", "Hidden Layers"]
+
+    return columns
+
+@app.callback(output_values,
+              [Input('dropdown', 'value')])
+def config_list_values(value):
     for root, _, files in os.walk(value):
         for file in files:
             if file.endswith(".json"):
@@ -355,24 +405,30 @@ def config_list(value):
     with open(config_file) as json_file:
         data = json.load(json_file)
 
-    res = []
+    if len(value.split('/')) == 5:
+        path = value+'/../../config.json'
+    else:
+        path = value+'/config.json'
 
-    res.append("Nome do Experimento: " + data['logger_kwargs']['exp_name'])
-    res.append("Gamma: " + str(data['gamma']))
-    res.append("Max_ep_len:" + str(data["max_ep_len"]))
-    res.append("Num_test_episodes: " + str(data["num_test_episodes"]))
-    res.append("Pi_lr: " + str(data["pi_lr"]))
-    res.append("Polyak: " + str(data["polyak"]))
-    res.append("Num_test_episodes: " + str(data["q_lr"]))
-    res.append("Replay_size: " + str(data["replay_size"]))
-    res.append("Save_freq: " + str(data["save_freq"]))
-    res.append("Seed: " + str(data["seed"]))
-    res.append("Start_steps: " + str(data["start_steps"]))
-    res.append("Steps_per_epoch: " + str(data["steps_per_epoch"]))
-    res.append("Update_after: " + str(data["update_after"]))
-    res.append("Update_every: " + str(data["update_every"]))
+    print(path)
+    with open(path) as json_file:
+        data2 = json.load(json_file)
+    print(data2)
 
-    return res
+    try:
+        hidden_layers = data['ac_kwargs']['hidden_sizes']
+    except:
+        hidden_layers = '(256,256)'
+
+    values = [value.split('/')[2], str(data2['s_money']), str(data2['taxes']),
+            str(data2['allotment']), str(data2['price_obs']), str(data2['reward']),
+            str(data["seed"]), str(data["epochs"]), 
+            str(data["steps_per_epoch"]), str(data["start_steps"]), str(data["update_after"]),
+            str(data["update_every"]), str(data['batch_size']), str(data['gamma']),
+            str(data['q_lr']), str(data["pi_lr"]), str(data["polyak"]),
+            str(data["replay_size"]), str(data["act_noise"]), hidden_layers]
+    
+    return values
 
 
 @app.callback([Output('profit', 'figure'), Output('testprofit', 'figure'), Output('loss', 'figure'),
@@ -389,19 +445,24 @@ def get_data(n, value):
 
     last_train = progress[-1]
 
-    columns = open(last_train).readlines()[0].split('\t')
+    try:
+        columns = open(last_train).readlines()[0].split('\t')
 
-    for i in columns:
-        result[i] = []
+        for i in columns:
+            result[i] = []
 
-    for line in open(last_train).readlines()[1:]:
-        for i, value in enumerate(line.split('\t')):
-            result[columns[i]].append(float(value))
+        for line in open(last_train).readlines()[1:]:
+            for i, value in enumerate(line.split('\t')):
+                result[columns[i]].append(float(value))
+        
+        df_data = pandas.DataFrame(result)
+
+        return graph_profit(df_data), graph_testprofit(df_data), graph_loss(df_data), graph_ep_ret(df_data), graph_qval(df_data), graph_buysellhold(df_data)
+    except:
+        fig = plotly.tools.make_subplots(rows=1, cols=1)
+        return fig, fig, fig, fig, fig, fig
+
     
-    df_data = pandas.DataFrame(result)
-
-    return graph_profit(df_data), graph_testprofit(df_data), graph_loss(df_data), graph_ep_ret(df_data), graph_qval(df_data), graph_buysellhold(df_data)
-
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)

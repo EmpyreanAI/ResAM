@@ -1,0 +1,10 @@
+th {
+    background-color: #e6ecf5;
+    color: black;
+}
+
+th, td {
+    /* padding: 15px; */
+    width: 10%;
+    text-align: center;
+  }

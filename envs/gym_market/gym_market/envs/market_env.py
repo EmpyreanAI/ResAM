@@ -378,7 +378,7 @@ class MarketEnv(gym.Env):
 
         end_w = 5
         sell_w = 2
-        daily_w = 0.3
+        daily_w = 0.1
 
         if self.reward_type not in ['full', 'sell_only', 'daily_only']:
             raise NotImplementedError

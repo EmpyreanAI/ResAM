@@ -29,12 +29,29 @@ Execution::
 
 
 """
+import os
 import gym
+import json
 import tensorflow as tf
+from datetime import datetime
 from spinup import ddpg_tf1, ppo_tf1, td3_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
-from datetime import datetime
+
+
+_configs = {
+    's_money': 10000,
+    'taxes': 0.0,
+    'allotment': 100,
+    'price_obs': True,
+    'reward': 'sell_only',
+    'log': 'done'
+}
+
+_stocks = ['PETR3'] # 'VALE3', 'ABEV3' 
+_windows = [6] #  6, 9
+_start_year = 2014
+_end_year = 2014
 
 def env_fn():
     """Create the MarketEnv environment function.
@@ -47,20 +64,11 @@ def env_fn():
     """
     import gym_market
 
-    stockutil = StockUtil(['PETR3'], [6]) # 'VALE3', 'ABEV3' , 6, 9
-    prices, preds = stockutil.prices_preds(start_year=2014, end_year=2014,
-                                          period=11)
+    stockutil = StockUtil(_stocks, _windows)
+    prices, preds = stockutil.prices_preds(start_year=_start_year, end_year=_end_year,
+                                          period=12)
 
-    configs = {
-        's_money': 10000,
-        'taxes': 0.0,
-        'allotment': 100,
-        'price_obs': True,
-        'reward': 'full',
-        'log': 'done'
-    }
-
-    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, configs=configs)
+    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, configs=_configs)
 
 
 
@@ -98,12 +106,6 @@ def create_exp_grid(name):
 
         - act_noise (float): Noise applied to actions to improve exploration. Only applied after start_steps. Defaults to 0.1.
 
-        - num_test_episodes (int): Number of test episodes. Defaults to 10.
-
-        - max_ep_len (int): Maximum size of one episode. Defaults to 1000.
-
-        - save_freq (int): Frequency in which the model is saved to a file. Defaults to 1.
-
         - ac_kwargs:hidden_sizes ((int,int)): Ammount of hidden states for the actor-critic neural network. Defaults to (256,256).
 
     Returns:
@@ -113,23 +115,20 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', 7)
-    # eg.add('steps_per_epoch', 5000)
-    eg.add('epochs', 10)
+    eg.add('seed', [7, 8])
+    # eg.add('steps_per_epoch', 10000)
+    eg.add('epochs', 1)
     # eg.add('replay_size', int(1e8))
-    eg.add('gamma', [0.8, 0.5])
+    eg.add('gamma', [0.5, 0.9])
     # eg.add('polyak', 0.995)
-    eg.add('pi_lr', 0.000000001) #000001
-    eg.add('q_lr', 0.00000001)
-    # eg.add('batch_size', 16)
-    eg.add('start_steps', 100000) # MUUUUITO IMPORTANTE
-    # eg.add('update_after', 2000)
+    eg.add('pi_lr', [0.1e-7, 1]) #000001
+    eg.add('q_lr', 0.1e-7)
+    # eg.add('batch_size', 8)
+    eg.add('start_steps', 200000) # MUUUUITO IMPORTANTE
+    # eg.add('update_after', 5000)
     eg.add('update_every', 1000)
     # eg.add('act_noise', 1)
-    # eg.add('num_test_episodes', 10)
-    # eg.add('max_ep_len', 1000)
-    # eg.add('save_freq', 3)
-    # eg.add('ac_kwargs:hidden_sizes', (1024, 1024))
+    eg.add('ac_kwargs:hidden_sizes', (1, 1))
 
     return eg
 
@@ -141,8 +140,21 @@ def run_exp(experiment, cpus=1):
         cpus (int, optional): Ammount of cpus for the experiment. Defaults to 1.
     
     """
-    now = datetime.now().strftime("%d-%m-%Y-%H:%M:%S")
-    experiment.run(ddpg_tf1, num_cpu=cpus,  data_dir='../../data/' + now)
+    # now = datetime.now().strftime("%d-%m-%Y-%H:%M:%S")
+    name = ""
+    for s in _stocks:
+        name += s + '_'
+    dir = f'../../data/{name}{_start_year}_{_end_year}'
+
+    try:
+        os.mkdir(f'../../data/{name}{_start_year}_{_end_year}')
+    except:
+        pass
+
+    with open(f'{dir}/config.json', 'w+') as fp:
+        json.dump(_configs, fp)
+
+    experiment.run(ddpg_tf1, num_cpu=cpus,  data_dir=dir)
     
 
 if __name__ == '__main__':
