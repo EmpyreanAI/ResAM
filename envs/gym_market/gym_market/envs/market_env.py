@@ -364,7 +364,7 @@ class MarketEnv(gym.Env):
     def _get_reward(self):
         """Calculate the reward for the step.
 
-        The reward value is the sell provit minus all the taxed.
+        The reward value is the sell profit minus all the taxed.
         If the episode is done, the reward is also the diference of the final money
         from the start money, multiplied by a weight.
 

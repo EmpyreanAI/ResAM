@@ -135,13 +135,13 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', [7, 8])
+    eg.add('seed', [7])
     # eg.add('steps_per_epoch', 10000)
     eg.add('epochs', 1)
     # eg.add('replay_size', int(1e8))
-    eg.add('gamma', [0.5, 0.9])
+    eg.add('gamma', [0.5])
     # eg.add('polyak', 0.995)
-    eg.add('pi_lr', [0.1e-7, 1]) #000001
+    eg.add('pi_lr', [0.1e-7]) #000001
     eg.add('q_lr', 0.1e-7)
     # eg.add('batch_size', 8)
     eg.add('start_steps', 200000) # MUUUUITO IMPORTANTE

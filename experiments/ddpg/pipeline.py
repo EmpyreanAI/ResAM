@@ -18,4 +18,5 @@ for item, doc in experiments.items():
     exec = ["python3", "resam.py"]
     for i in args_list:
         exec.append(str(i))
+    print("[PIPELINE] Executing experiment " + item)
     call(exec)
