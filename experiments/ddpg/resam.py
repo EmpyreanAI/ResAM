@@ -66,7 +66,7 @@ def env_fn():
 
     stockutil = StockUtil(_stocks, _windows)
     prices, preds = stockutil.prices_preds(start_year=_start_year, end_year=_end_year,
-                                          period=12)
+                                          period=6)
 
     return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, configs=_configs)
 
@@ -115,20 +115,20 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', [7, 8])
-    # eg.add('steps_per_epoch', 10000)
-    eg.add('epochs', 1)
-    # eg.add('replay_size', int(1e8))
-    eg.add('gamma', [0.5, 0.9])
-    # eg.add('polyak', 0.995)
-    eg.add('pi_lr', [0.1e-7, 1]) #000001
-    eg.add('q_lr', 0.1e-7)
-    # eg.add('batch_size', 8)
-    eg.add('start_steps', 200000) # MUUUUITO IMPORTANTE
-    # eg.add('update_after', 5000)
-    eg.add('update_every', 1000)
-    # eg.add('act_noise', 1)
-    eg.add('ac_kwargs:hidden_sizes', (1, 1))
+    eg.add('seed', [9,96], in_name=True)
+    eg.add('steps_per_epoch', 10000, in_name=True) # Fixed
+    eg.add('epochs', 100, in_name=True) # Fix on 100
+    eg.add('replay_size', [250000, 750000], in_name=True)
+    eg.add('gamma', [0.2, 0.5, 0.99], in_name=True)
+    eg.add('polyak', 0.995, in_name=True)
+    eg.add('pi_lr', [0.1e-5, 0.1e-8], in_name=True) #000001
+    eg.add('q_lr', [0.1e-5, 0.1e-8], in_name=True)
+    eg.add('batch_size', [16, 64], in_name=True)
+    eg.add('start_steps', [200000, 500000], in_name=True) # MUUUUITO IMPORTANTE
+    eg.add('update_after', 8000, in_name=True)
+    eg.add('update_every', 500, in_name=True)
+    eg.add('act_noise', 0.25, in_name=True)
+    eg.add('ac_kwargs:hidden_sizes', [(64, 64), (256,256)])
 
     return eg
 
