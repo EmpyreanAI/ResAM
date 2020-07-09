@@ -63,7 +63,8 @@ app.layout = html.Div([
             dcc.Dropdown(
                 id='dropdown',
                 options=[],
-                value=get_first_dir()
+                value=get_first_dir(),
+                optionHeight=60
             )
         ], style={"width":"60%", "float": "right"})
     ], style={"height":"100pt"}),
@@ -369,7 +370,7 @@ def get_data_dirs(n):
     for root, _, files in os.walk(base):
         if len(root.split('/')) == 5:
             label = root.split('/')
-            label = f"{label[2]}/{label[3]}/{label[4]}"
+            label = f"{label[2]}/{label[4]}"
             dir_list.append({'label':label, 'value':root})
 
     return [dir_list]

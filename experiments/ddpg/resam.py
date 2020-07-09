@@ -149,7 +149,7 @@ def create_exp_grid(name):
     eg.add('update_after', 8000, in_name=True)
     eg.add('update_every', 500, in_name=True)
     eg.add('act_noise', 0.25, in_name=True)
-    eg.add('ac_kwargs:hidden_sizes', [(64, 64), (256,256)])
+    eg.add('ac_kwargs:hidden_sizes', [(64, 64), (256,256)], in_name=True)
 
     return eg
 
