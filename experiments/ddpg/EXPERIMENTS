@@ -13,3 +13,183 @@ exp_1:
         - 6
     _start_year: 2014
     _end_year: 2014
+
+exp_2:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: sell_only
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+
+exp_3:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: sell_yesterday
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+
+exp_4:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: full
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+exp_5:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: daily_only
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+exp_6:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: daily_sell
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+exp_7:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: profit_yesterday
+        log: done
+
+    _stocks: 
+        - VALE3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+exp_8:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: sell_only
+        log: done
+
+    _stocks: 
+        - VALE3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+
+exp_9:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: sell_yesterday
+        log: done
+
+    _stocks: 
+        - VALE3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+
+exp_10:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: full
+        log: done
+
+    _stocks: 
+        - VALE3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+exp_11:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: daily_only
+        log: done
+
+    _stocks: 
+        - VALE3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+
+exp_12:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: daily_sell
+        log: done
+
+    _stocks: 
+        - VALE3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014

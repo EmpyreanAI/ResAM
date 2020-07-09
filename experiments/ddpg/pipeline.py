@@ -15,7 +15,7 @@ for item, doc in experiments.items():
     args_list.extend(doc['_windows'])
     args_list.append(doc['_start_year'])
     args_list.append(doc['_end_year'])
-    exec = ["python3", "resam.py"]
+    exec = ["python", "resam.py"]
     for i in args_list:
         exec.append(str(i))
     print("[PIPELINE] Executing experiment " + item)

@@ -45,7 +45,7 @@ env_fn_args = {
         'taxes': 0.0,
         'allotment': 100,
         'price_obs': True,
-        'reward': 'sell_only',
+        'reward': 'profit_yesterday',
         'log': 'done'
     },
 
@@ -55,8 +55,9 @@ env_fn_args = {
     '_end_year': 2014,
 }
 
-n_ins = int(sys.argv[7])
+
 if len(sys.argv) > 1:
+    n_ins = int(sys.argv[7])
     env_fn_args = {
         '_configs': {
             's_money': float(sys.argv[1]),
@@ -168,10 +169,10 @@ def run_exp(new_env_args=None, cpus=1):
     name = ""
     for s in env_fn_args['_stocks']:
         name += s + '_'
-    dir = f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}'
+    dir = f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}_{env_fn_args["_configs"]["reward"]}'
 
     try:
-        os.mkdir(f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}')
+        os.mkdir(dir)
     except:
         pass
 
@@ -182,4 +183,4 @@ def run_exp(new_env_args=None, cpus=1):
     
 
 if __name__ == '__main__':
-    run_exp()
+    run_exp(cpus=4)

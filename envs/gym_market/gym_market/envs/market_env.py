@@ -381,17 +381,17 @@ class MarketEnv(gym.Env):
         sell_w = 2
         daily_w = 0.1
 
-        if self.reward_type not in ['full', 'sell_only', 'daily_only', 'profit_yesterday']:
+        if self.reward_type not in ['full', 'sell_only', 'daily_only', 'profit_yesterday', 'daily_sell', 'sell_yesterday']:
             raise NotImplementedError
 
         # Variable rewards
-        if self.reward_type in ['full', 'daily_only']:
+        if self.reward_type in ['full', 'daily_only', 'daily_sell']:
             reward += daily_w*self._daily_returns()
 
-        if self.reward_type in ['full', 'sell_only']:
+        if self.reward_type in ['full', 'sell_only', 'daily_sell', 'sell_yesterday']:
             reward += sell_w*self.sold_profit
 
-        if self.reward_type in ['profit_yesterday']:
+        if self.reward_type in ['full', 'profit_yesterday', 'sell_yesterday']:
             reward += self.balance - self.yesterday_balance
 
         # Necessary Rewards
