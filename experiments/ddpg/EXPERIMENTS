@@ -1,0 +1,15 @@
+exp_1:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: profit_yesterday
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2014
+    _end_year: 2014

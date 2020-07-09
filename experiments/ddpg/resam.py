@@ -29,6 +29,7 @@ Execution::
 
 
 """
+import sys
 import os
 import gym
 import json
@@ -38,20 +39,38 @@ from spinup import ddpg_tf1, ppo_tf1, td3_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
 
+env_fn_args = {
+    '_configs': {
+        's_money': 10000,
+        'taxes': 0.0,
+        'allotment': 100,
+        'price_obs': True,
+        'reward': 'sell_only',
+        'log': 'done'
+    },
 
-_configs = {
-    's_money': 10000,
-    'taxes': 0.0,
-    'allotment': 100,
-    'price_obs': True,
-    'reward': 'sell_only',
-    'log': 'done'
+    '_stocks': ['PETR3'], # 'VALE3', 'ABEV3' 
+    '_windows': [6], #  6, 9
+    '_start_year': 2014,
+    '_end_year': 2014,
 }
 
-_stocks = ['PETR3'] # 'VALE3', 'ABEV3' 
-_windows = [6] #  6, 9
-_start_year = 2014
-_end_year = 2014
+n_ins = int(sys.argv[7])
+if len(sys.argv) > 1:
+    env_fn_args = {
+        '_configs': {
+            's_money': float(sys.argv[1]),
+            'taxes': float(sys.argv[2]),
+            'allotment': int(sys.argv[3]),
+            'price_obs': sys.argv[4],
+            'reward': sys.argv[5],
+            'log': sys.argv[6]
+        },
+        '_stocks': sys.argv[8:8+n_ins], # 'VALE3', 'ABEV3' 
+        '_windows': [int(i) for i in sys.argv[8+n_ins:8+(2*n_ins)]], #  6, 9
+        '_start_year': int(sys.argv[8+(2*n_ins)]),
+        '_end_year': int(sys.argv[8+(2*n_ins)+1]),
+    }
 
 def env_fn():
     """Create the MarketEnv environment function.
@@ -63,14 +82,15 @@ def env_fn():
 
     """
     import gym_market
+    global env_fn_args
+    
+    stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
+    prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'], 
+                                           end_year=env_fn_args['_end_year'],
+                                           period=6)
 
-    stockutil = StockUtil(_stocks, _windows)
-    prices, preds = stockutil.prices_preds(start_year=_start_year, end_year=_end_year,
-                                          period=6)
-
-    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, configs=_configs)
-
-
+    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, 
+                     configs=env_fn_args['_configs'])
 
 def create_exp_grid(name):
     """Create a pipeline (or grid) with all desired experiments configurations.
@@ -132,7 +152,7 @@ def create_exp_grid(name):
 
     return eg
 
-def run_exp(experiment, cpus=1):
+def run_exp(new_env_args=None, cpus=1):
     """Run the created experiment.
     
     Args:
@@ -140,23 +160,26 @@ def run_exp(experiment, cpus=1):
         cpus (int, optional): Ammount of cpus for the experiment. Defaults to 1.
     
     """
-    # now = datetime.now().strftime("%d-%m-%Y-%H:%M:%S")
+    global env_fn_args
+    if new_env_args is not None:
+        env_fn_args = new_env_args
+    
+    experiment = create_exp_grid("MarketDDPG")
     name = ""
-    for s in _stocks:
+    for s in env_fn_args['_stocks']:
         name += s + '_'
-    dir = f'../../data/{name}{_start_year}_{_end_year}'
+    dir = f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}'
 
     try:
-        os.mkdir(f'../../data/{name}{_start_year}_{_end_year}')
+        os.mkdir(f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}')
     except:
         pass
 
     with open(f'{dir}/config.json', 'w+') as fp:
-        json.dump(_configs, fp)
+        json.dump(env_fn_args['_configs'], fp)
 
-    experiment.run(ddpg_tf1, num_cpu=cpus,  data_dir=dir)
+    experiment.run(ddpg_tf1, num_cpu=cpus, data_dir=dir)
     
 
 if __name__ == '__main__':
-    exp = create_exp_grid("MarketDDPG")
-    run_exp(exp)
+    run_exp()

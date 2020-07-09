@@ -215,6 +215,7 @@ class MarketEnv(gym.Env):
         """
         self.ep_step += 1
         action = [1 if x > .5 else 0 if x > 0 else x for x in action]
+        self.yesterday_balance = self.balance
         self._take_action(action)
         self.state = self._make_observation()
         reward = self._get_reward()
@@ -364,7 +365,7 @@ class MarketEnv(gym.Env):
     def _get_reward(self):
         """Calculate the reward for the step.
 
-        The reward value is the sell provit minus all the taxed.
+        The reward value is the sell profit minus all the taxed.
         If the episode is done, the reward is also the diference of the final money
         from the start money, multiplied by a weight.
 
@@ -380,7 +381,7 @@ class MarketEnv(gym.Env):
         sell_w = 2
         daily_w = 0.1
 
-        if self.reward_type not in ['full', 'sell_only', 'daily_only']:
+        if self.reward_type not in ['full', 'sell_only', 'daily_only', 'profit_yesterday']:
             raise NotImplementedError
 
         # Variable rewards
@@ -389,6 +390,9 @@ class MarketEnv(gym.Env):
 
         if self.reward_type in ['full', 'sell_only']:
             reward += sell_w*self.sold_profit
+
+        if self.reward_type in ['profit_yesterday']:
+            reward += self.balance - self.yesterday_balance
 
         # Necessary Rewards
         if self._check_done():
