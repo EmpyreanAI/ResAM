@@ -80,6 +80,7 @@ class MarketEnv(gym.Env):
         self.epoch_profit = 0
         self.ep_ret = 0
         self.pre_state = []
+        self.pre_value = 0
 
         # Gym Required Variablies
         self.action_space = self._action_space()
@@ -215,7 +216,6 @@ class MarketEnv(gym.Env):
         """
         self.ep_step += 1
         action = [1 if x > .5 else 0 if x > 0 else x for x in action]
-        self.yesterday_balance = self.balance
         self._take_action(action)
         self.state = self._make_observation()
         reward = self._get_reward()
@@ -223,6 +223,7 @@ class MarketEnv(gym.Env):
         info = self._get_info(action)
         self._log_step(action, reward, done)
         self.pre_state = self.state
+        self.pre_value = self._portfolio_value()
         return self.state, reward, done, info
 
     def _check_done(self):
@@ -375,30 +376,34 @@ class MarketEnv(gym.Env):
         Returns:
             The reward for the step.
         """
-        reward = 0
+    
+        # end_w = 10
+        reward_w = 1000
+        sell_w = 0
+        daily_w = 0
+        daydiff_w = 0
 
-        end_w = 5
-        sell_w = 2
-        daily_w = 0.1
-
-        if self.reward_type not in ['full', 'sell_only', 'daily_only', 'profit_yesterday', 'daily_sell', 'sell_yesterday']:
+        if self.reward_type == 'full':
+            sell_w = 0.3
+            daily_w = 0.1
+            daydiff_w = 0.6
+        elif self.reward_type == 'sell':
+            sell_w = 1
+        elif self.reward_type == 'daily': 
+            daily_w = 1
+        elif self.reward_type == 'daydiff':
+            daydiff_w = 1
+        else:
             raise NotImplementedError
 
-        # Variable rewards
-        if self.reward_type in ['full', 'daily_only', 'daily_sell']:
-            reward += daily_w*self._daily_returns()
+        reward_daily = daily_w*self._daily_returns()
+        reward_sell = sell_w*self.sold_profit
+        reward_daydiff = daydiff_w*(self._portfolio_value() - self.pre_value)
 
-        if self.reward_type in ['full', 'sell_only', 'daily_sell', 'sell_yesterday']:
-            reward += sell_w*self.sold_profit
+        reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w 
 
-        if self.reward_type in ['full', 'profit_yesterday', 'sell_yesterday']:
-            reward += self.balance - self.yesterday_balance
-
-        # Necessary Rewards
-        if self._check_done():
-                reward += end_w*(self._full_value() - self.start_money)
-        reward += self.taxes_reward
-        reward /= 1000
+        # if self._check_done():
+        #         reward += end_w*(self._full_value() - self.start_money)
 
         self.ep_ret += reward
 
