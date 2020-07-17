@@ -80,7 +80,7 @@ class MarketEnv(gym.Env):
         self.epoch_profit = 0
         self.ep_ret = 0
         self.pre_state = []
-        self.pre_value = 0
+        self.pre_value = self.start_money 
 
         # Gym Required Variablies
         self.action_space = self._action_space()
@@ -223,7 +223,7 @@ class MarketEnv(gym.Env):
         info = self._get_info(action)
         self._log_step(action, reward, done)
         self.pre_state = self.state
-        self.pre_value = self._portfolio_value()
+        self.pre_value = self._full_value()
         return self.state, reward, done, info
 
     def _check_done(self):
@@ -377,8 +377,8 @@ class MarketEnv(gym.Env):
             The reward for the step.
         """
     
-        # end_w = 10
-        reward_w = 1000
+        end_w = 0.01
+        reward_w = 100
         sell_w = 0
         daily_w = 0
         daydiff_w = 0
@@ -398,12 +398,12 @@ class MarketEnv(gym.Env):
 
         reward_daily = daily_w*self._daily_returns()
         reward_sell = sell_w*self.sold_profit
-        reward_daydiff = daydiff_w*(self._portfolio_value() - self.pre_value)
+        reward_daydiff = daydiff_w*(self._full_value() - self.pre_value)
 
         reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w 
 
-        # if self._check_done():
-        #         reward += end_w*(self._full_value() - self.start_money)
+        if self._check_done():
+                reward += end_w*(self._full_value() - self.start_money)
 
         self.ep_ret += reward
 

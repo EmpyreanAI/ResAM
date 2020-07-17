@@ -13,6 +13,7 @@ exp_1:
         - 6
     _start_year: 2014
     _end_year: 2014
+    _period: 6
 
 exp_2:
     _configs:
@@ -21,7 +22,7 @@ exp_2:
         allotment: 100
         price_obs: True
         reward: full
-        log: all
+        log: done
 
     _stocks: 
         - PETR3
@@ -29,6 +30,7 @@ exp_2:
         - 6
     _start_year: 2014
     _end_year: 2014
+    _period: 6
 
 exp_3:
     _configs:
@@ -37,7 +39,7 @@ exp_3:
         allotment: 100
         price_obs: True
         reward: daily
-        log: all
+        log: done
 
     _stocks: 
         - PETR3
@@ -45,6 +47,7 @@ exp_3:
         - 6
     _start_year: 2014
     _end_year: 2014
+    _period: 6
 
 exp_4:
     _configs:
@@ -53,7 +56,7 @@ exp_4:
         allotment: 100
         price_obs: True
         reward: sell
-        log: all
+        log: done
 
     _stocks: 
         - PETR3
@@ -61,4 +64,73 @@ exp_4:
         - 6
     _start_year: 2014
     _end_year: 2014
+    _period: 6
+
+exp_5:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: daydiff
+        log: all
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2010
+    _end_year: 2014
+    _period: 12
+
+exp_6:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: full
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2010
+    _end_year: 2014
+    _period: 12
+
+exp_7:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: daily
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2010
+    _end_year: 2014
+    _period: 12
+
+exp_8:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: sell
+        log: done
+
+    _stocks: 
+        - PETR3
+    _windows: 
+        - 6
+    _start_year: 2010
+    _end_year: 2014
+    _period: 12
 
