@@ -63,7 +63,7 @@ class MarketEnv(gym.Env):
 
 
     def __init__(self, assets_prices, insiders_preds, configs=_def_configs):
-       
+
         # Configs
         self.start_money = configs['s_money']
         self.taxes = configs['taxes']
@@ -80,7 +80,7 @@ class MarketEnv(gym.Env):
         self.epoch_profit = 0
         self.ep_ret = 0
         self.pre_state = []
-        self.pre_value = self.start_money 
+        self.pre_value = self.start_money
 
         # Gym Required Variablies
         self.action_space = self._action_space()
@@ -170,7 +170,7 @@ class MarketEnv(gym.Env):
     def _full_value(self):
         """Get how much money the agent have in total.
 
-        The money considers the sum of the avaiable money in the balance 
+        The money considers the sum of the avaiable money in the balance
         and the value of the agent's portifolio at the given time-step.
 
         Returns:
@@ -197,10 +197,10 @@ class MarketEnv(gym.Env):
 
     def step(self, action):
         """Run one timestep of the environment’s dynamics.
-         
+
         When end of episode is reached, you are responsible for calling reset() to reset this environment’s state.
         Accepts an action and returns a tuple (observation, reward, done, info).
-        
+
         Args:
             action (object): an action provided by the agent.
 
@@ -210,7 +210,7 @@ class MarketEnv(gym.Env):
             reward (float) : amount of reward returned after previous action.
 
             done (bool): whether the episode has ended, in which case further step() calls will return undefined results.
-            
+
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning).
 
         """
@@ -257,7 +257,7 @@ class MarketEnv(gym.Env):
         Args:
             actions ([float]): Vector of actions between -1 and 1,
             each index for a given asset.
-            
+
         """
         self.sold_profit = 0
         for share_index, action in enumerate(actions):
@@ -308,14 +308,14 @@ class MarketEnv(gym.Env):
         which allocate the resources of the wallet in the assets.
 
         Note:
-            All agent's profits and expenses are updated in this function. 
-            
+            All agent's profits and expenses are updated in this function.
+
             On buying:
 
                 - Taxes are paid;
                 - Money is decreased;
                 - Asset is accounted to the portfolio.
-            
+
             On sell:
 
                 - Taxes are paid;
@@ -337,7 +337,7 @@ class MarketEnv(gym.Env):
         """Make observations about the env.
 
         Observatios contains:
-        
+
             - Balance;
             - Portifolio Value;
             - Prediction for each asset.
@@ -357,7 +357,7 @@ class MarketEnv(gym.Env):
             if self.price_obs:
                 value = self.assets_prices[i][self.ep_step]
                 insiders.append(value)
-                
+
 
         obs = wallet + insiders
 
@@ -376,7 +376,7 @@ class MarketEnv(gym.Env):
         Returns:
             The reward for the step.
         """
-    
+
         end_w = 0.01
         reward_w = 100
         sell_w = 0
@@ -389,7 +389,7 @@ class MarketEnv(gym.Env):
             daydiff_w = 0.6
         elif self.reward_type == 'sell':
             sell_w = 1
-        elif self.reward_type == 'daily': 
+        elif self.reward_type == 'daily':
             daily_w = 1
         elif self.reward_type == 'daydiff':
             daydiff_w = 1
@@ -400,12 +400,15 @@ class MarketEnv(gym.Env):
         reward_sell = sell_w*self.sold_profit
         reward_daydiff = daydiff_w*(self._full_value() - self.pre_value)
 
-        reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w 
+        reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w
 
         if self._check_done():
                 reward += end_w*(self._full_value() - self.start_money)
 
         self.ep_ret += reward
+
+        if reward == 0:
+            reward = -1
 
         return reward
 
@@ -417,7 +420,7 @@ class MarketEnv(gym.Env):
             action (vector): The actions made at the timestep
             reward (float): Ammount of reward recived
             done (bool): Indicate if is the end of the episode
-         
+
         """
         if self.log not in ['all', 'done', 'none']:
             raise NotImplementedError
@@ -446,7 +449,7 @@ class MarketEnv(gym.Env):
 
         Returns:
             The initial observation.
-        
+
         """
         self.ep_step = -1
         self.episode += 1
@@ -461,8 +464,8 @@ class MarketEnv(gym.Env):
 
     def _get_info(self, actions):
         """Get Info.
-        
-        Needed to overwrite to work with gym. For more information check 
+
+        Needed to overwrite to work with gym. For more information check
         the gym documentation.
 
         """
@@ -482,9 +485,9 @@ class MarketEnv(gym.Env):
 
     def render(self, mode='human', close=False):
         """Renders the environment.
-        
-        Needed to overwrite to work with gym. For more information check 
+
+        Needed to overwrite to work with gym. For more information check
         the gym documentation.
-        
+
         """
         # self._log_step(False, [], [], done)

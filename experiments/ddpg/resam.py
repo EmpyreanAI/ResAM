@@ -35,7 +35,7 @@ import gym
 import json
 import tensorflow as tf
 from datetime import datetime
-from spinup import ddpg_tf1, ppo_tf1, td3_tf1
+from spinup import ddpg_tf1, ppo_tf1, td3_tf1, sac_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
 
@@ -49,10 +49,11 @@ env_fn_args = {
         'log': 'done'
     },
 
-    '_stocks': ['PETR3'], # 'VALE3', 'ABEV3' 
+    '_stocks': ['PETR3'], # 'VALE3', 'ABEV3'
     '_windows': [6], #  6, 9
     '_start_year': 2014,
     '_end_year': 2014,
+    '_period': 6
 }
 
 
@@ -67,7 +68,7 @@ if len(sys.argv) > 1:
             'reward': sys.argv[5],
             'log': sys.argv[6]
         },
-        '_stocks': sys.argv[8:8+n_ins], # 'VALE3', 'ABEV3' 
+        '_stocks': sys.argv[8:8+n_ins], # 'VALE3', 'ABEV3'
         '_windows': [int(i) for i in sys.argv[8+n_ins:8+(2*n_ins)]], #  6, 9
         '_start_year': int(sys.argv[8+(2*n_ins)]),
         '_end_year': int(sys.argv[8+(2*n_ins)+1]),
@@ -87,11 +88,11 @@ def env_fn():
     global env_fn_args
     print(env_fn_args['_period'])
     stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
-    prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'], 
+    prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
                                            end_year=env_fn_args['_end_year'],
                                            period=env_fn_args['_period'])
 
-    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, 
+    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
                      configs=env_fn_args['_configs'])
 
 def create_exp_grid(name):
@@ -137,33 +138,33 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', [96, 18], in_name=True)
-    eg.add('steps_per_epoch', 10000, in_name=True) # Fixed
-    eg.add('epochs', 100, in_name=True) # Fix on 100
-    eg.add('replay_size', 500000, in_name=True)
-    eg.add('gamma',  0.999, in_name=True)
-    eg.add('polyak', 0.995, in_name=True)
-    eg.add('pi_lr', [0.1e-6, 0.1e-3], in_name=True) #000001 0.0005
-    eg.add('q_lr', 0.1e-6, in_name=True) #-7
-    eg.add('batch_size', 32, in_name=True)
-    eg.add('start_steps', 500000, in_name=True) # MUUUUITO IMPORTANTE
-    eg.add('act_noise', 0.5, in_name=True)
-    eg.add('ac_kwargs:hidden_sizes', [(16,16), (64,64), (1024,1024)], in_name=True)
+    # eg.add('seed', [96, 18], in_name=True)
+    # eg.add('steps_per_epoch', 10000, in_name=True) # Fixed
+    # eg.add('epochs', 100, in_name=True) # Fix on 100
+    # eg.add('replay_size', 500000, in_name=True)
+    # eg.add('gamma',  0.999, in_name=True)
+    # eg.add('polyak', 0.995, in_name=True)
+    # eg.add('pi_lr', [0.1e-6, 0.1e-3], in_name=True) #000001 0.0005
+    # eg.add('q_lr', 0.1e-6, in_name=True) #-7
+    # eg.add('batch_size', 32, in_name=True)
+    # eg.add('start_steps', 500000, in_name=True) # MUUUUITO IMPORTANTE
+    # eg.add('act_noise', 0.5, in_name=True)
+    # eg.add('ac_kwargs:hidden_sizes', [(16,16), (64,64), (1024,1024)], in_name=True)
 
     return eg
 
 def run_exp(new_env_args=None, cpus=1):
     """Run the created experiment.
-    
+
     Args:
         experiment (:obj:`ExperimentGrid`): The grid of experiments to execute.
         cpus (int, optional): Ammount of cpus for the experiment. Defaults to 1.
-    
+
     """
     global env_fn_args
     if new_env_args is not None:
         env_fn_args = new_env_args
-    
+
     experiment = create_exp_grid("MarketDDPG")
     name = ""
     for s in env_fn_args['_stocks']:
@@ -178,8 +179,8 @@ def run_exp(new_env_args=None, cpus=1):
     with open(f'{dir}/config.json', 'w+') as fp:
         json.dump(env_fn_args['_configs'], fp)
 
-    experiment.run(ddpg_tf1, num_cpu=cpus, data_dir=dir)
-    
+    experiment.run(sac_tf1, num_cpu=cpus, data_dir=dir)
+
 
 if __name__ == '__main__':
-    run_exp(cpus=4)
+    run_exp(cpus=1)
