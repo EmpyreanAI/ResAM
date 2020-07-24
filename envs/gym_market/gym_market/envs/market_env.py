@@ -218,7 +218,7 @@ class MarketEnv(gym.Env):
         action = [1 if x > .5 else 0 if x > 0 else x for x in action]
         self._take_action(action)
         self.state = self._make_observation()
-        reward = self._get_reward()
+        reward = self._get_reward(action[0])
         done = self._check_done()
         info = self._get_info(action)
         self._log_step(action, reward, done)
@@ -363,7 +363,7 @@ class MarketEnv(gym.Env):
 
         return np.array(obs)
 
-    def _get_reward(self):
+    def _get_reward(self, action):
         """Calculate the reward for the step.
 
         The reward value is the sell profit minus all the taxed.
@@ -377,38 +377,54 @@ class MarketEnv(gym.Env):
             The reward for the step.
         """
 
-        end_w = 0.01
-        reward_w = 100
-        sell_w = 0
-        daily_w = 0
-        daydiff_w = 0
 
-        if self.reward_type == 'full':
-            sell_w = 0.3
-            daily_w = 0.1
-            daydiff_w = 0.6
-        elif self.reward_type == 'sell':
-            sell_w = 1
-        elif self.reward_type == 'daily':
-            daily_w = 1
-        elif self.reward_type == 'daydiff':
-            daydiff_w = 1
-        else:
-            raise NotImplementedError
+        # reward_w = 100
+        # sell_w = 0
+        # daily_w = 0
+        # daydiff_w = 0
 
-        reward_daily = daily_w*self._daily_returns()
-        reward_sell = sell_w*self.sold_profit
-        reward_daydiff = daydiff_w*(self._full_value() - self.pre_value)
+        # if self.reward_type == 'full':
+        #     sell_w = 0.3
+        #     daily_w = 0.1
+        #     daydiff_w = 0.6
+        # elif self.reward_type == 'sell':
+        #     sell_w = 1
+        # elif self.reward_type == 'daily':
+        #     daily_w = 1
+        # elif self.reward_type == 'daydiff':
+        #     daydiff_w = 1
+        # else:
+        #     raise NotImplementedError
 
-        reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w
+        # reward_daily = daily_w*self._daily_returns()
+        # reward_sell = sell_w*self.sold_profit
+        # reward_daydiff = daydiff_w*(self._full_value() - self.pre_value)
+
+        # reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w
+
+        reward = 0
+        end_w = 10
+        punishment = 100
+
+        if action == 1:
+            reward += self.sold_profit
+            if self.sold_profit == 0:
+                reward -= punishment
+        elif action == 0:
+            reward += 0.1*(self._full_value() - self.start_money) #self._daily_returns()
+            if reward == 0:
+                reward -= punishment
+        elif action < 0:
+            reward += -50
+            if self.shares[0] == {}:
+                reward -= punishment
 
         if self._check_done():
                 reward += end_w*(self._full_value() - self.start_money)
 
-        self.ep_ret += reward
+        reward /= 100
 
-        if reward == 0:
-            reward = -1
+        self.ep_ret += reward
 
         return reward
 

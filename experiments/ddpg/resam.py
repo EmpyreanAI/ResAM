@@ -86,12 +86,10 @@ def env_fn():
     """
     import gym_market
     global env_fn_args
-    print(env_fn_args['_period'])
     stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
     prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
                                            end_year=env_fn_args['_end_year'],
                                            period=env_fn_args['_period'])
-
     return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
                      configs=env_fn_args['_configs'])
 
@@ -138,18 +136,21 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    # eg.add('seed', [96, 18], in_name=True)
-    # eg.add('steps_per_epoch', 10000, in_name=True) # Fixed
-    # eg.add('epochs', 100, in_name=True) # Fix on 100
-    # eg.add('replay_size', 500000, in_name=True)
-    # eg.add('gamma',  0.999, in_name=True)
-    # eg.add('polyak', 0.995, in_name=True)
-    # eg.add('pi_lr', [0.1e-6, 0.1e-3], in_name=True) #000001 0.0005
-    # eg.add('q_lr', 0.1e-6, in_name=True) #-7
-    # eg.add('batch_size', 32, in_name=True)
-    # eg.add('start_steps', 500000, in_name=True) # MUUUUITO IMPORTANTE
-    # eg.add('act_noise', 0.5, in_name=True)
-    # eg.add('ac_kwargs:hidden_sizes', [(16,16), (64,64), (1024,1024)], in_name=True)
+    eg.add('seed', 9, in_name=True)
+    eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
+    eg.add('epochs', 50, in_name=True) # Fix on 100
+    eg.add('replay_size', 25000, in_name=True)
+    eg.add('gamma',  0.99, in_name=True)
+    eg.add('polyak', 0.995, in_name=True)
+    eg.add('pi_lr', 0.00001, in_name=True) #000001 0.0005
+    eg.add('q_lr', 0.00001, in_name=True) #-7
+    eg.add('batch_size', 100, in_name=True)
+    eg.add('start_steps', 20000, in_name=True) # MUUUUITO IMPORTANTE
+    eg.add('update_after', 900, in_name=True)
+    eg.add('act_noise', 0.5, in_name=True)
+    eg.add('ac_kwargs:hidden_sizes', (16,16), in_name=True)
+    # eg.add('ac_kwargs:output_activation', tf.nn.relu, in_name=True)
+    eg.add('ac_kwargs:activation', tf.nn.tanh, in_name=True)
 
     return eg
 
@@ -179,7 +180,7 @@ def run_exp(new_env_args=None, cpus=1):
     with open(f'{dir}/config.json', 'w+') as fp:
         json.dump(env_fn_args['_configs'], fp)
 
-    experiment.run(sac_tf1, num_cpu=cpus, data_dir=dir)
+    experiment.run(ddpg_tf1, num_cpu=cpus, data_dir=dir)
 
 
 if __name__ == '__main__':

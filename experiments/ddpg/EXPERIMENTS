@@ -4,16 +4,16 @@ exp_1:
         taxes: 0.0
         allotment: 100
         price_obs: True
-        reward: daydiff
+        reward: daily
         log: all
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2014
     _end_year: 2014
-    _period: 6
+    _period: 12
 
 exp_2:
     _configs:
@@ -24,9 +24,9 @@ exp_2:
         reward: full
         log: done
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2014
     _end_year: 2014
@@ -41,9 +41,9 @@ exp_3:
         reward: daily
         log: done
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2014
     _end_year: 2014
@@ -58,9 +58,9 @@ exp_4:
         reward: sell
         log: done
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2014
     _end_year: 2014
@@ -75,12 +75,12 @@ exp_5:
         reward: daydiff
         log: all
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2010
-    _end_year: 2014
+    _end_year: 2013
     _period: 12
 
 exp_6:
@@ -92,12 +92,12 @@ exp_6:
         reward: full
         log: done
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2010
-    _end_year: 2014
+    _end_year: 2013
     _period: 12
 
 exp_7:
@@ -109,12 +109,12 @@ exp_7:
         reward: daily
         log: done
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2010
-    _end_year: 2014
+    _end_year: 2013
     _period: 12
 
 exp_8:
@@ -126,11 +126,10 @@ exp_8:
         reward: sell
         log: done
 
-    _stocks: 
+    _stocks:
         - PETR3
-    _windows: 
+    _windows:
         - 6
     _start_year: 2010
-    _end_year: 2014
+    _end_year: 2013
     _period: 12
-
