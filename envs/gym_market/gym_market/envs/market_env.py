@@ -407,12 +407,20 @@ class MarketEnv(gym.Env):
         punishment = 100
 
         if action == 1:
-            reward += self.sold_profit
-            if self.sold_profit == 0:
+            sold = self.sold_profit
+            if sold > 0:
+                reward += sold
+            elif sold  < 0:
+                reward += 10*sold
+            else:
                 reward -= punishment
         elif action == 0:
-            reward += 0.1*(self._full_value() - self.start_money) #self._daily_returns()
-            if reward == 0:
+            overall_profit = (self._full_value() - self.start_money)
+            if overall_profit > 0:
+                reward += overall_profit
+            elif overall_profit  < 0:
+                reward += 10*overall_profit
+            else:
                 reward -= punishment
         elif action < 0:
             reward += -50
