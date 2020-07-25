@@ -4,7 +4,7 @@ exp_1:
         taxes: 0.0
         allotment: 100
         price_obs: True
-        reward: daily
+        reward: new
         log: all
 
     _stocks:
@@ -13,7 +13,7 @@ exp_1:
         - 6
     _start_year: 2014
     _end_year: 2014
-    _period: 12
+    _period: 6
 
 exp_2:
     _configs:
@@ -21,110 +21,8 @@ exp_2:
         taxes: 0.0
         allotment: 100
         price_obs: True
-        reward: full
-        log: done
-
-    _stocks:
-        - PETR3
-    _windows:
-        - 6
-    _start_year: 2014
-    _end_year: 2014
-    _period: 6
-
-exp_3:
-    _configs:
-        s_money: 10000
-        taxes: 0.0
-        allotment: 100
-        price_obs: True
-        reward: daily
-        log: done
-
-    _stocks:
-        - PETR3
-    _windows:
-        - 6
-    _start_year: 2014
-    _end_year: 2014
-    _period: 6
-
-exp_4:
-    _configs:
-        s_money: 10000
-        taxes: 0.0
-        allotment: 100
-        price_obs: True
-        reward: sell
-        log: done
-
-    _stocks:
-        - PETR3
-    _windows:
-        - 6
-    _start_year: 2014
-    _end_year: 2014
-    _period: 6
-
-exp_5:
-    _configs:
-        s_money: 10000
-        taxes: 0.0
-        allotment: 100
-        price_obs: True
-        reward: daydiff
+        reward: new
         log: all
-
-    _stocks:
-        - PETR3
-    _windows:
-        - 6
-    _start_year: 2010
-    _end_year: 2013
-    _period: 12
-
-exp_6:
-    _configs:
-        s_money: 10000
-        taxes: 0.0
-        allotment: 100
-        price_obs: True
-        reward: full
-        log: done
-
-    _stocks:
-        - PETR3
-    _windows:
-        - 6
-    _start_year: 2010
-    _end_year: 2013
-    _period: 12
-
-exp_7:
-    _configs:
-        s_money: 10000
-        taxes: 0.0
-        allotment: 100
-        price_obs: True
-        reward: daily
-        log: done
-
-    _stocks:
-        - PETR3
-    _windows:
-        - 6
-    _start_year: 2010
-    _end_year: 2013
-    _period: 12
-
-exp_8:
-    _configs:
-        s_money: 10000
-        taxes: 0.0
-        allotment: 100
-        price_obs: True
-        reward: sell
-        log: done
 
     _stocks:
         - PETR3

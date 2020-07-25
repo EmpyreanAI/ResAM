@@ -411,7 +411,7 @@ class MarketEnv(gym.Env):
             if sold > 0:
                 reward += sold
             elif sold  < 0:
-                reward += 10*sold
+                reward += 5*sold
             else:
                 reward -= punishment
         elif action == 0:
@@ -419,7 +419,7 @@ class MarketEnv(gym.Env):
             if overall_profit > 0:
                 reward += overall_profit
             elif overall_profit  < 0:
-                reward += 10*overall_profit
+                reward += 5*overall_profit
             else:
                 reward -= punishment
         elif action < 0:
