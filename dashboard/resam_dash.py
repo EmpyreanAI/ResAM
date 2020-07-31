@@ -30,7 +30,7 @@ def get_first_dir():
     in_data = os.listdir(base)
     for dir in in_data:
         if os.path.isdir(base + dir):
-            return base+dir 
+            return base+dir
     return []
 
 
@@ -49,10 +49,10 @@ td_list_values = []
 for td in range(20):
     td_list_columns.append(html.Th(id='config_col-' + str(td)))
     td_list_values.append(html.Td(id='config_val-' + str(td)))
-    
+
 
 app.layout = html.Div([
-    
+
     html.Div([
         html.Div(
             html.Img(src='assets/resam.svg', width='60%'),
@@ -129,7 +129,7 @@ app.layout = html.Div([
             )
         ])
     ],id='content_div')
-    
+
 ])
 
 def graph_testprofit(data):
@@ -139,7 +139,7 @@ def graph_testprofit(data):
     }
     fig['layout']['legend'] = {'x': 1, 'y': 1, 'xanchor': 'right'}
     fig['layout']['height'] = 350
-    fig['layout']['title'] = "Lucro em Teste"
+    fig['layout']['title'] = "Lucro Médio em Teste"
     fig['layout']['yaxis']['title'] = "Reais"
     fig['layout']['xaxis']['title'] = "Épocas"
 
@@ -155,7 +155,7 @@ def graph_testprofit(data):
     }, 1, 1)
 
     return fig
-   
+
 
 def graph_profit(data):
     fig = plotly.tools.make_subplots(rows=1, cols=1)
@@ -208,7 +208,7 @@ def graph_ep_ret(data):
     }
     fig['layout']['legend'] = {'x': 1, 'y': 1, 'xanchor': 'right'}
     fig['layout']['height'] = 350
-    fig['layout']['title'] = "Retorno"
+    fig['layout']['title'] = "Retorno Médio"
     fig['layout']['yaxis']['title'] = "Valor do Retorno"
     fig['layout']['xaxis']['title'] = "Épocas"
 
@@ -402,7 +402,7 @@ def config_list_values(value):
         for file in files:
             if file.endswith(".json"):
                 config_file = os.path.join(root, file)
-    
+
     with open(config_file) as json_file:
         data = json.load(json_file)
 
@@ -423,12 +423,12 @@ def config_list_values(value):
 
     values = [value.split('/')[2], str(data2['s_money']), str(data2['taxes']),
             str(data2['allotment']), str(data2['price_obs']), str(data2['reward']),
-            str(data["seed"]), str(data["epochs"]), 
+            str(data["seed"]), str(data["epochs"]),
             str(data["steps_per_epoch"]), str(data["start_steps"]), str(data["update_after"]),
             str(data["update_every"]), str(data['batch_size']), str(data['gamma']),
             str(data['q_lr']), str(data["pi_lr"]), str(data["polyak"]),
             str(data["replay_size"]), str(data["act_noise"]), hidden_layers]
-    
+
     return values
 
 
@@ -455,7 +455,7 @@ def get_data(n, value):
         for line in open(last_train).readlines()[1:]:
             for i, value in enumerate(line.split('\t')):
                 result[columns[i]].append(float(value))
-        
+
         df_data = pandas.DataFrame(result)
 
         return graph_profit(df_data), graph_testprofit(df_data), graph_loss(df_data), graph_ep_ret(df_data), graph_qval(df_data), graph_buysellhold(df_data)
@@ -463,7 +463,7 @@ def get_data(n, value):
         fig = plotly.tools.make_subplots(rows=1, cols=1)
         return fig, fig, fig, fig, fig, fig
 
-    
+
 
 if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0')

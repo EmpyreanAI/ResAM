@@ -56,7 +56,6 @@ env_fn_args = {
     '_period': 6
 }
 
-
 if len(sys.argv) > 1:
     n_ins = int(sys.argv[7])
     env_fn_args = {
@@ -64,7 +63,7 @@ if len(sys.argv) > 1:
             's_money': float(sys.argv[1]),
             'taxes': float(sys.argv[2]),
             'allotment': int(sys.argv[3]),
-            'price_obs': sys.argv[4],
+            'price_obs': True if sys.argv[4] == "True" else False,
             'reward': sys.argv[5],
             'log': sys.argv[6]
         },
@@ -134,25 +133,25 @@ def create_exp_grid(name):
 
     """
 
-    
+
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', [9,41], in_name=True)
+    eg.add('seed', 9, in_name=True)
     eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
-    eg.add('epochs', 500, in_name=True) # Fix on 100
-    eg.add('replay_size', 50000, in_name=True)
-    eg.add('gamma', [0.5, 0.99], in_name=True)
+    eg.add('epochs', 200, in_name=True) # Fix on 100
+    eg.add('replay_size', 500000, in_name=True)
+    eg.add('gamma', 0.99, in_name=True)
     eg.add('polyak', 0.995, in_name=True)
-    eg.add('pi_lr', [0.0001, 0.1e-5, 0.1e-8], in_name=True) #000001
-    eg.add('q_lr', [0.0001, 0.1e-5, 0.1e-8], in_name=True)
+    eg.add('pi_lr',  0.0001, in_name=True) #000001
+    eg.add('q_lr', 0.0001, in_name=True)
     eg.add('batch_size', 100, in_name=True)
-    eg.add('start_steps', 50000, in_name=True) # MUUUUITO IMPORTANTE
+    eg.add('start_steps', 10000, in_name=True) # MUUUUITO IMPORTANTE
     eg.add('update_after', 900, in_name=True)
     # eg.add('update_every', 500, in_name=True)
-    eg.add('act_noise', 0.7, in_name=True)
-    eg.add('ac_kwargs:hidden_sizes', [(16, 16), (64, 64), (256,256)], in_name=True)
-    eg.add('ac_kwargs:activation', tf.nn.tanh, in_name=True)
+    eg.add('act_noise', 1.00, in_name=True)
+    eg.add('ac_kwargs:hidden_sizes', (16, 16), in_name=True)
+    # eg.add('ac_kwargs:activation', tf.nn.selu, in_name=True)
 
     return eg
 
@@ -172,7 +171,7 @@ def run_exp(new_env_args=None, cpus=1):
     name = ""
     for s in env_fn_args['_stocks']:
         name += s + '_'
-    dir = f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}_{env_fn_args["_configs"]["reward"]}'
+    dir = f'../../data/{name}{env_fn_args["_start_year"]}_{env_fn_args["_end_year"]}_{env_fn_args["_configs"]["price_obs"]}'
 
     try:
         os.mkdir(dir)
@@ -186,4 +185,4 @@ def run_exp(new_env_args=None, cpus=1):
 
 
 if __name__ == '__main__':
-    run_exp(cpus=4)
+    run_exp(cpus=1)

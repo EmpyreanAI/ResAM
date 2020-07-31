@@ -28,6 +28,40 @@ exp_2:
         - PETR3
     _windows:
         - 6
-    _start_year: 2010
-    _end_year: 2013
-    _period: 12
+    _start_year: 2014
+    _end_year: 2014
+    _period: 6
+
+exp_3:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: False
+        reward: new
+        log: all
+
+    _stocks:
+        - VALE3
+    _windows:
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+    _period: 6
+
+exp_4:
+    _configs:
+        s_money: 10000
+        taxes: 0.0
+        allotment: 100
+        price_obs: True
+        reward: new
+        log: all
+
+    _stocks:
+        - VALE3
+    _windows:
+        - 6
+    _start_year: 2014
+    _end_year: 2014
+    _period: 6

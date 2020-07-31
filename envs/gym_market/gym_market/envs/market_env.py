@@ -81,6 +81,7 @@ class MarketEnv(gym.Env):
         self.ep_ret = 0
         self.pre_state = []
         self.pre_value = self.start_money
+        self.bought = 0
 
         # Gym Required Variablies
         self.action_space = self._action_space()
@@ -101,8 +102,8 @@ class MarketEnv(gym.Env):
             A spaces.Box() value with the observation space.
 
         """
-        money_low = [0, 0]
-        money_high = [np.inf, np.inf]
+        money_low = [0, -np.inf, -np.inf]
+        money_high = [np.inf, np.inf, np.inf]
 
         insider_low = []
         insider_high = []
@@ -283,6 +284,7 @@ class MarketEnv(gym.Env):
             each index for a given asset.
 
         """
+        self.bought = 0
         money = self.balance
         for share_index, action in enumerate(actions):
             if action > 0:
@@ -292,6 +294,7 @@ class MarketEnv(gym.Env):
                 allot_buy_amt = alloc_money // allotment_price
                 total_shares = allot_buy_amt * self.min_allotment
                 if total_shares > 0:
+                    self.bought = 1
                     if day_price in self.shares[share_index]:
                         self.shares[share_index][day_price] += total_shares
                     else:
@@ -348,7 +351,7 @@ class MarketEnv(gym.Env):
         """
         obs = np.zeros(self.observation_space.shape)
 
-        wallet = [self.balance, self._portfolio_value()]
+        wallet = [self.balance, self._daily_returns(), self._full_value() - self.start_money]
 
         insiders = []
         for i in range(0, self.n_insiders):
@@ -377,6 +380,7 @@ class MarketEnv(gym.Env):
             The reward for the step.
         """
 
+        # BAD
 
         # reward_w = 100
         # sell_w = 0
@@ -402,29 +406,27 @@ class MarketEnv(gym.Env):
 
         # reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w
 
+        ## GOOD
+
         reward = 0
         end_w = 10
-        punishment = 100
+        punishment = 100*(self.ep_step*0.1)
 
         if action == 1:
             sold = self.sold_profit
             if sold > 0:
                 reward += sold
-            elif sold  < 0:
-                reward += 5*sold
             else:
                 reward -= punishment
         elif action == 0:
             overall_profit = (self._full_value() - self.start_money)
             if overall_profit > 0:
                 reward += overall_profit
-            elif overall_profit  < 0:
-                reward += 5*overall_profit
             else:
                 reward -= punishment
         elif action < 0:
             reward += -50
-            if self.shares[0] == {}:
+            if self.bought == 0:
                 reward -= punishment
 
         if self._check_done():
@@ -435,6 +437,7 @@ class MarketEnv(gym.Env):
         self.ep_ret += reward
 
         return reward
+
 
     def _log_step(self, action, reward, done):
         """Log every step or the episode.
