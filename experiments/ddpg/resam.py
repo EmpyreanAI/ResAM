@@ -137,21 +137,21 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', 9, in_name=True)
+    eg.add('seed', 807, in_name=True)
     eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
     eg.add('epochs', 200, in_name=True) # Fix on 100
     eg.add('replay_size', 500000, in_name=True)
     eg.add('gamma', 0.99, in_name=True)
     eg.add('polyak', 0.995, in_name=True)
-    eg.add('pi_lr',  0.0001, in_name=True) #000001
+    eg.add('pi_lr',  0.0005, in_name=True) #000001
     eg.add('q_lr', 0.0001, in_name=True)
     eg.add('batch_size', 100, in_name=True)
     eg.add('start_steps', 10000, in_name=True) # MUUUUITO IMPORTANTE
     eg.add('update_after', 900, in_name=True)
     # eg.add('update_every', 500, in_name=True)
-    eg.add('act_noise', 1.00, in_name=True)
+    eg.add('act_noise', 1.0, in_name=True)
     eg.add('ac_kwargs:hidden_sizes', (16, 16), in_name=True)
-    # eg.add('ac_kwargs:activation', tf.nn.selu, in_name=True)
+    # eg.add('ac_kwargs:activation', tf.nn.tanh, in_name=True)
 
     return eg
 

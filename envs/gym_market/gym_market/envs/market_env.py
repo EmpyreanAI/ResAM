@@ -102,15 +102,22 @@ class MarketEnv(gym.Env):
             A spaces.Box() value with the observation space.
 
         """
-        money_low = [0, -np.inf, -np.inf]
-        money_high = [np.inf, np.inf, np.inf]
+        money_low = [0, -np.inf]
+        money_high = [np.inf, np.inf]
 
         insider_low = []
         insider_high = []
 
         for _ in range(0, self.n_insiders):
+            # Prediction
             insider_low.append(0)
             insider_high.append(1)
+            # Ammount in Portifolio
+            insider_low.append(0)
+            insider_high.append(np.inf)
+            # Portifolio profit
+            insider_low.append(-np.inf)
+            insider_high.append(np.inf)
             if self.price_obs:
                 insider_low.append(0)
                 insider_high.append(np.inf)
@@ -137,7 +144,7 @@ class MarketEnv(gym.Env):
         action_high = [1]*self.n_insiders
         return spaces.Box(np.array(action_low), np.array(action_high))
 
-    def _daily_returns(self):
+    def _daily_return(self, share_index):
         """Calculate the appreciation of the portfolio in the current day.
 
         The appreciation based on the bought price.
@@ -147,12 +154,11 @@ class MarketEnv(gym.Env):
 
         """
         day_ret = 0
-        for share_index in self.shares:
-            share = self.shares[share_index]
-            day_price = self._current_price(share_index)
-            for holding in share:
-                holding_amt = share[holding]
-                day_ret += (day_price - holding)*holding_amt
+        share = self.shares[share_index]
+        day_price = self._current_price(share_index)
+        for holding in share:
+            holding_amt = share[holding]
+            day_ret += (day_price - holding)*holding_amt
         return day_ret
 
     def _portfolio_value(self):
@@ -216,10 +222,10 @@ class MarketEnv(gym.Env):
 
         """
         self.ep_step += 1
-        action = [1 if x > .5 else 0 if x > 0 else x for x in action]
+        action = [1 if x > .5 else 0 if x >= 0 else x for x in action]
         self._take_action(action)
         self.state = self._make_observation()
-        reward = self._get_reward(action[0])
+        reward = self._get_reward(action)
         done = self._check_done()
         info = self._get_info(action)
         self._log_step(action, reward, done)
@@ -260,14 +266,14 @@ class MarketEnv(gym.Env):
             each index for a given asset.
 
         """
-        self.sold_profit = 0
+        self.sold_profit = [0]*self.n_insiders
         for share_index, action in enumerate(actions):
             num_sold = 0
             if action == 1:
                 day_price = self._current_price(share_index)
                 share = self.shares[share_index]
                 for holding in share:
-                    self.sold_profit += (day_price - holding)*share[holding]
+                    self.sold_profit[share_index] += (day_price - holding)*share[holding]
                     num_sold += share[holding]
                 self.balance += (day_price*num_sold)
                 self.balance -= self.taxes
@@ -284,7 +290,7 @@ class MarketEnv(gym.Env):
             each index for a given asset.
 
         """
-        self.bought = 0
+        self.bought = [0]*self.n_insiders
         money = self.balance
         for share_index, action in enumerate(actions):
             if action > 0:
@@ -294,7 +300,7 @@ class MarketEnv(gym.Env):
                 allot_buy_amt = alloc_money // allotment_price
                 total_shares = allot_buy_amt * self.min_allotment
                 if total_shares > 0:
-                    self.bought = 1
+                    self.bought[share_index] = 1
                     if day_price in self.shares[share_index]:
                         self.shares[share_index][day_price] += total_shares
                     else:
@@ -302,6 +308,14 @@ class MarketEnv(gym.Env):
                 self.balance -= (total_shares*day_price)
                 self.balance -= self.taxes
                 self.taxes_reward -= self.taxes
+
+    def _assets_amt(self, share_index):
+        share = self.shares[share_index]
+        amt = 0
+        for holding in share:
+            amt += share[holding]
+        return amt
+
 
     def _take_action(self, actions):
         """Execute the actions vectors in the env for the step.
@@ -351,16 +365,18 @@ class MarketEnv(gym.Env):
         """
         obs = np.zeros(self.observation_space.shape)
 
-        wallet = [self.balance, self._daily_returns(), self._full_value() - self.start_money]
+        profit = self._full_value() - self.start_money
+        wallet = [self.balance, profit]
 
         insiders = []
         for i in range(0, self.n_insiders):
             pred = self.insiders_preds[i][self.ep_step]
             insiders.append(pred)
+            insiders.append(self._assets_amt(i))
+            insiders.append(self._daily_return(i))
             if self.price_obs:
                 value = self.assets_prices[i][self.ep_step]
                 insiders.append(value)
-
 
         obs = wallet + insiders
 
@@ -380,59 +396,32 @@ class MarketEnv(gym.Env):
             The reward for the step.
         """
 
-        # BAD
-
-        # reward_w = 100
-        # sell_w = 0
-        # daily_w = 0
-        # daydiff_w = 0
-
-        # if self.reward_type == 'full':
-        #     sell_w = 0.3
-        #     daily_w = 0.1
-        #     daydiff_w = 0.6
-        # elif self.reward_type == 'sell':
-        #     sell_w = 1
-        # elif self.reward_type == 'daily':
-        #     daily_w = 1
-        # elif self.reward_type == 'daydiff':
-        #     daydiff_w = 1
-        # else:
-        #     raise NotImplementedError
-
-        # reward_daily = daily_w*self._daily_returns()
-        # reward_sell = sell_w*self.sold_profit
-        # reward_daydiff = daydiff_w*(self._full_value() - self.pre_value)
-
-        # reward = (reward_daily + reward_sell + reward_daydiff + self.taxes_reward)/ reward_w
-
-        ## GOOD
-
         reward = 0
-        end_w = 10
+        end_w = 100
         punishment = 100*(self.ep_step*0.1)
-
-        if action == 1:
-            sold = self.sold_profit
-            if sold > 0:
-                reward += sold
-            else:
-                reward -= punishment
-        elif action == 0:
-            overall_profit = (self._full_value() - self.start_money)
-            if overall_profit > 0:
-                reward += overall_profit
-            else:
-                reward -= punishment
-        elif action < 0:
-            reward += -50
-            if self.bought == 0:
-                reward -= punishment
+        for i in range(0, self.n_insiders):
+            if action[i] == 1:
+                sold = self.sold_profit[i]
+                if sold <= 0:
+                    reward -= punishment
+                else:
+                    reward += sold
+            elif action[i] == 0:
+                profit = self._daily_return(i)
+                if profit <= 0:
+                    reward -= punishment
+                else:
+                    reward += profit
+            elif action[i] < 0:
+                if self.bought[i] == 0:
+                    reward -= punishment
+                else:
+                    reward -= 10
 
         if self._check_done():
                 reward += end_w*(self._full_value() - self.start_money)
 
-        reward /= 100
+        reward /= 1000
 
         self.ep_ret += reward
 
@@ -461,7 +450,7 @@ class MarketEnv(gym.Env):
             print(f"Saldo: {self.balance:.2f}")
             print(f"Preco dos Ativos: {[self._current_price(x) for x in self.shares]}")
             print(f"Lucro Geral: {(self._full_value() - self.start_money):.2f}")
-            print(f"Lucro Diario: {self._daily_returns():.2f}")
+            # print(f"Lucro Diario: {self._daily_returns():.2f}")
             print(f"Valor da Carteira: {self._full_value():.2f}")
             print(f"Recompensa: {reward}")
             print(f"Done: {done}")
