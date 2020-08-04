@@ -8,7 +8,7 @@ exp_1:
         log: all
 
     _stocks:
-        - VALE3
+        - ABEV3
     _windows:
         - 6
     _start_year: 2014

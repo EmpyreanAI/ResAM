@@ -38,6 +38,7 @@ from datetime import datetime
 from spinup import ddpg_tf1, ppo_tf1, td3_tf1, sac_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
+from rmm import RMM
 
 env_fn_args = {
     '_configs': {
@@ -89,6 +90,12 @@ def env_fn():
     prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
                                            end_year=env_fn_args['_end_year'],
                                            period=env_fn_args['_period'])
+
+    trends = RMM.trends_group(env_fn_args['_stocks'], prices, start_month=1,
+                              period=env_fn_args['_period'], mean=False, cap=[50, 50, 50])
+
+    print(trends)
+    
     return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
                      configs=env_fn_args['_configs'])
 
@@ -137,7 +144,7 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', 807, in_name=True)
+    eg.add('seed', 9    , in_name=True)
     eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
     eg.add('epochs', 200, in_name=True) # Fix on 100
     eg.add('replay_size', 500000, in_name=True)
@@ -185,4 +192,4 @@ def run_exp(new_env_args=None, cpus=1):
 
 
 if __name__ == '__main__':
-    run_exp(cpus=1)
+    run_exp(cpus=4)

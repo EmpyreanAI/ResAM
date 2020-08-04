@@ -4,6 +4,7 @@ Sphinx==3.1.1
 sphinx-rtd-theme==0.5.0
 -e git+https://github.com/EmpyreanAI/B3Data#egg=b3data
 -e git+https://github.com/Skalwalker/spinningup#egg=spinup
+-e git+https://github.com/EmpyreanAI/RMM#egg=rmm
 gym
 -e ./envs/gym_market
 PyYAML==5.3.1   
