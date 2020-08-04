@@ -14,3 +14,6 @@ exp_1:
     _start_year: 2014
     _end_year: 2014
     _period: 6
+    _trends: True
+    _cap: 
+        - 50

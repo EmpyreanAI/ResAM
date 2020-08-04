@@ -16,6 +16,8 @@ for item, doc in experiments.items():
     args_list.append(doc['_start_year'])
     args_list.append(doc['_end_year'])
     args_list.append(doc['_period'])
+    args_list.append(doc['_trends'])
+    args_list.extend(doc['_cap'])
     exec = ["python", "resam.py"]
     for i in args_list:
         exec.append(str(i))
