@@ -15,6 +15,7 @@ import plotly
 import pandas
 import datetime
 import urllib.request, json
+import plotly.io as pio
 
 import dash
 import dash_core_components as dcc
@@ -93,12 +94,20 @@ app.layout = html.Div([
         html.Div([
             html.Div(
                 dcc.Graph(
-                    id='ep_ret', style={'width': '800'}
+                    id='ep_ret', style={'width': '800'}, config={
+                        "toImageButtonOptions": {
+                            "format": "svg"
+                        }
+                    }
                 ), style={'display': 'inline-block'}
             ),
             html.Div(
                 dcc.Graph(
-                    id='buysellhold', style={'width': '800'}
+                    id='buysellhold', style={'width': '800'}, config={
+                        "toImageButtonOptions": {
+                            "format": "svg"
+                        }
+                    }
                 ), style={'display': 'inline-block'}
             )
         ]),
@@ -106,12 +115,20 @@ app.layout = html.Div([
         html.Div([
             html.Div(
                 dcc.Graph(
-                    id='testprofit', style={'width': '800'}
+                    id='testprofit', style={'width': '800'}, config={
+                        "toImageButtonOptions": {
+                            "format": "svg"
+                        }
+                    }
                 ), style={'display': 'inline-block'}
             ),
             html.Div(
                 dcc.Graph(
-                    id='profit', style={'width': '800'}
+                    id='profit', style={'width': '800'}, config={
+                        "toImageButtonOptions": {
+                            "format": "svg"
+                        }
+                    }
                 ), style={'display': 'inline-block'}
             )
         ]),
@@ -119,12 +136,20 @@ app.layout = html.Div([
         html.Div([
             html.Div(
                 dcc.Graph(
-                    id='qval', style={'width': '800'}
+                    id='qval', style={'width': '800'}, config={
+                        "toImageButtonOptions": {
+                            "format": "svg"
+                        }
+                    }
                 ), style={'display': 'inline-block'}
             ),
             html.Div(
                 dcc.Graph(
-                    id='loss', style={'width': '800'}
+                    id='loss', style={'width': '800'}, config={
+                        "toImageButtonOptions": {
+                            "format": "svg"
+                        }
+                    }
                 ), style={'display': 'inline-block'}
             )
         ])

@@ -5,12 +5,12 @@ exp_1:
         allotment: 100
         price_obs: True
         reward: new
-        log: all
+        log: none
 
     _stocks:
-        - VALE3
+        - ABEV3
     _windows:
-        - 6
+        - 9
     _start_year: 2014
     _end_year: 2014
     _period: 6

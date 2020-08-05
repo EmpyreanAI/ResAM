@@ -137,7 +137,7 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', 807, in_name=True)
+    eg.add('seed', 9, in_name=True)
     eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
     eg.add('epochs', 200, in_name=True) # Fix on 100
     eg.add('replay_size', 500000, in_name=True)
@@ -151,7 +151,7 @@ def create_exp_grid(name):
     # eg.add('update_every', 500, in_name=True)
     eg.add('act_noise', 1.0, in_name=True)
     eg.add('ac_kwargs:hidden_sizes', (16, 16), in_name=True)
-    # eg.add('ac_kwargs:activation', tf.nn.tanh, in_name=True)
+    # eg.add('ac_kwargs:activation', tf.nn.swish, in_name=True)
 
     return eg
 
