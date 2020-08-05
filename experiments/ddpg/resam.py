@@ -38,6 +38,7 @@ from datetime import datetime
 from spinup import ddpg_tf1, ppo_tf1, td3_tf1, sac_tf1
 from b3data.utils.stock_util import StockUtil
 from spinup.utils.run_utils import ExperimentGrid
+from rmm import RMM
 
 env_fn_args = {
     '_configs': {
@@ -53,7 +54,9 @@ env_fn_args = {
     '_windows': [6], #  6, 9
     '_start_year': 2014,
     '_end_year': 2014,
-    '_period': 6
+    '_period': 6,
+    '_trends': False,
+    '_cap': 50
 }
 
 if len(sys.argv) > 1:
@@ -68,10 +71,12 @@ if len(sys.argv) > 1:
             'log': sys.argv[6]
         },
         '_stocks': sys.argv[8:8+n_ins], # 'VALE3', 'ABEV3'
-        '_windows': [int(i) for i in sys.argv[8+n_ins:8+(2*n_ins)]], #  6, 9
+        '_windows': [int(i) for i in sys.argv[8+n_ins:8+(2*n_ins)]],
         '_start_year': int(sys.argv[8+(2*n_ins)]),
         '_end_year': int(sys.argv[8+(2*n_ins)+1]),
         '_period': int(sys.argv[8+(2*n_ins)+2]),
+        '_trends': sys.argv[8+(2*n_ins)+3],
+        '_cap': [int(i) for i in sys.argv[8+(2*n_ins)+4:8+(2*n_ins)+(4+n_ins)]],
     }
 
 def env_fn():
@@ -89,6 +94,15 @@ def env_fn():
     prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
                                            end_year=env_fn_args['_end_year'],
                                            period=env_fn_args['_period'])
+
+    trends = RMM.trends_group(env_fn_args['_stocks'], prices, start_month=1,
+                              period=env_fn_args['_period'],
+                              mean=False,
+                              cap=env_fn_args['_cap'])
+
+    print(len(preds[0]))
+    print(len(trends[0]))
+
     return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
                      configs=env_fn_args['_configs'])
 
@@ -139,7 +153,7 @@ def create_exp_grid(name):
     eg.add('env_fn', env_fn)
     eg.add('seed', 9, in_name=True)
     eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
-    eg.add('epochs', 200, in_name=True) # Fix on 100
+    eg.add('epochs', 10000, in_name=True) # Fix on 100
     eg.add('replay_size', 500000, in_name=True)
     eg.add('gamma', 0.99, in_name=True)
     eg.add('polyak', 0.995, in_name=True)

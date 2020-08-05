@@ -398,7 +398,7 @@ class MarketEnv(gym.Env):
 
         reward = 0
         end_w = 100
-        punishment = 100*(self.ep_step*0.1)
+        punishment = 100#*(self.ep_step*0.1)
         for i in range(0, self.n_insiders):
             if action[i] == 1:
                 sold = self.sold_profit[i]
