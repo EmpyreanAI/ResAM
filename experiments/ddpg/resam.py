@@ -75,7 +75,7 @@ if len(sys.argv) > 1:
         '_start_year': int(sys.argv[8+(2*n_ins)]),
         '_end_year': int(sys.argv[8+(2*n_ins)+1]),
         '_period': int(sys.argv[8+(2*n_ins)+2]),
-        '_trends': sys.argv[8+(2*n_ins)+3],
+        '_trends': True if sys.argv[8+(2*n_ins)+3] == "True" else False,
         '_cap': [int(i) for i in sys.argv[8+(2*n_ins)+4:8+(2*n_ins)+(4+n_ins)]],
     }
 
@@ -95,16 +95,15 @@ def env_fn():
                                            end_year=env_fn_args['_end_year'],
                                            period=env_fn_args['_period'])
 
+
     trends = RMM.trends_group(env_fn_args['_stocks'], prices, start_month=1,
                               period=env_fn_args['_period'],
                               mean=False,
                               cap=env_fn_args['_cap'])
 
-    print(len(preds[0]))
-    print(len(trends[0]))
 
-    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
-                     configs=env_fn_args['_configs'])
+    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, trends=trends,
+                    trends_enable=env_fn_args['_trends'], configs=env_fn_args['_configs'])
 
 def create_exp_grid(name):
     """Create a pipeline (or grid) with all desired experiments configurations.
@@ -151,9 +150,9 @@ def create_exp_grid(name):
     eg = ExperimentGrid(name=name)
 
     eg.add('env_fn', env_fn)
-    eg.add('seed', 9, in_name=True)
+    eg.add('seed', 807, in_name=True)
     eg.add('steps_per_epoch', 1000, in_name=True) # Fixed
-    eg.add('epochs', 10000, in_name=True) # Fix on 100
+    eg.add('epochs', 200, in_name=True) # Fix on 100
     eg.add('replay_size', 500000, in_name=True)
     eg.add('gamma', 0.99, in_name=True)
     eg.add('polyak', 0.995, in_name=True)
@@ -165,7 +164,7 @@ def create_exp_grid(name):
     # eg.add('update_every', 500, in_name=True)
     eg.add('act_noise', 1.0, in_name=True)
     eg.add('ac_kwargs:hidden_sizes', (16, 16), in_name=True)
-    # eg.add('ac_kwargs:activation', tf.nn.swish, in_name=True)
+    # eg.add('ac_kwargs:activation', tf.nn.softmax, in_name=True)
 
     return eg
 
