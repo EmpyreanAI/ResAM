@@ -62,7 +62,7 @@ class MarketEnv(gym.Env):
     }
 
 
-    def __init__(self, assets_prices, insiders_preds, configs=_def_configs):
+    def __init__(self, assets_prices, insiders_preds, trends, trends_enable=False, configs=_def_configs):
 
         # Configs
         self.start_money = configs['s_money']
@@ -72,6 +72,9 @@ class MarketEnv(gym.Env):
         self.reward_type = configs['reward']
         self.log = configs['log']
 
+        self.risks = trends
+        self.trends = trends_enable
+        print(trends_enable)
         self.n_insiders = len(assets_prices)
         self.assets_prices = assets_prices
         self.insiders_preds = insiders_preds
@@ -121,6 +124,10 @@ class MarketEnv(gym.Env):
             if self.price_obs:
                 insider_low.append(0)
                 insider_high.append(np.inf)
+             #Trends
+            if self.trends:
+                insider_low.append(0)
+                insider_high.append(1)
 
 
         obs_low = money_low + insider_low
@@ -377,6 +384,8 @@ class MarketEnv(gym.Env):
             if self.price_obs:
                 value = self.assets_prices[i][self.ep_step]
                 insiders.append(value)
+            if self.trends:
+                insiders.append(self.risks[i][self.ep_step])
 
         obs = wallet + insiders
 

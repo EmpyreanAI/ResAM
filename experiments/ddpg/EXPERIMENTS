@@ -1,6 +1,6 @@
 exp_1:
     _configs:
-        s_money: 10000
+        s_money: 50000
         taxes: 0.0
         allotment: 100
         price_obs: True
@@ -9,11 +9,18 @@ exp_1:
 
     _stocks:
         - PETR3
+        - VALE3
+        - ABEV3
+
     _windows:
         - 6
+        - 6
+        - 9
     _start_year: 2014
     _end_year: 2014
     _period: 6
     _trends: True
     _cap:
-        - 50
+        - 90
+        - 90
+        - 90
