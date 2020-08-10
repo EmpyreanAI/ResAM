@@ -34,6 +34,7 @@ import os
 import gym
 import json
 import tensorflow as tf
+import pandas as pd
 from datetime import datetime
 from spinup import ddpg_tf1, ppo_tf1, td3_tf1, sac_tf1
 from b3data.utils.stock_util import StockUtil
@@ -79,6 +80,15 @@ if len(sys.argv) > 1:
         '_cap': [int(i) for i in sys.argv[8+(2*n_ins)+4:8+(2*n_ins)+(4+n_ins)]],
     }
 
+def prices_preds(codes=['PETR3', 'VALE3', 'ABEV3']):
+    prices, preds = [], []
+    for index, code in enumerate(codes):
+        df = pd.read_csv(f'insiders_csv/{code}.csv')
+        prices.append(df['prices'].values)
+        preds.append(df['preds'].values)
+
+    return prices, preds
+
 def env_fn():
     """Create the MarketEnv environment function.
 
@@ -90,18 +100,16 @@ def env_fn():
     """
     import gym_market
     global env_fn_args
-    stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
-    prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
-                                           end_year=env_fn_args['_end_year'],
-                                           period=env_fn_args['_period'])
+    # stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
+    # prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
+    #                                        end_year=env_fn_args['_end_year'],
+    #                                        period=env_fn_args['_period'])
+    prices, preds = prices_preds(env_fn_args['_stocks'])
 
     trends = RMM.trends_group(env_fn_args['_stocks'], prices, start_month=1,
                               period=env_fn_args['_period'],
                               mean=False,
                               cap=env_fn_args['_cap'])
-
-    print(len(preds[0]))
-    print(len(trends[0]))
 
     return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
                      configs=env_fn_args['_configs'])
