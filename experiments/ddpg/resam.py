@@ -100,11 +100,11 @@ def env_fn():
     """
     import gym_market
     global env_fn_args
-    # stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
-    # prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
-    #                                        end_year=env_fn_args['_end_year'],
-    #                                        period=env_fn_args['_period'])
-    prices, preds = prices_preds(env_fn_args['_stocks'])
+    stockutil = StockUtil(env_fn_args['_stocks'], env_fn_args['_windows'])
+    prices, preds = stockutil.prices_preds(start_year=env_fn_args['_start_year'],
+                                           end_year=env_fn_args['_end_year'],
+                                           period=env_fn_args['_period'])
+    # prices, preds = prices_preds(env_fn_args['_stocks'])
 
 
     trends = RMM.trends_group(env_fn_args['_stocks'], prices, start_month=1,
@@ -112,14 +112,8 @@ def env_fn():
                               mean=False,
                               cap=env_fn_args['_cap'])
 
-<<<<<<< HEAD
     return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds,
-                     configs=env_fn_args['_configs'])
-=======
-
-    return gym.make('MarketEnv-v0', assets_prices=prices, insiders_preds=preds, trends=trends,
-                    trends_enable=env_fn_args['_trends'], configs=env_fn_args['_configs'])
->>>>>>> d5831b00a9a2b364ab37883fdcb2b884b2e19f28
+                    trends=trends, configs=env_fn_args['_configs'])
 
 def create_exp_grid(name):
     """Create a pipeline (or grid) with all desired experiments configurations.

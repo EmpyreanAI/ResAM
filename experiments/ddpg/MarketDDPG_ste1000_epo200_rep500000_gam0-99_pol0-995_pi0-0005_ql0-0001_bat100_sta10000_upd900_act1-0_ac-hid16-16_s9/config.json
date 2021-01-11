@@ -1,0 +1,47 @@
+{
+    "ac_kwargs":	{
+        "hidden_sizes":	[
+            16,
+            16
+        ]
+    },
+    "act_noise":	1.0,
+    "actor_critic":	"mlp_actor_critic",
+    "batch_size":	100,
+    "env_fn":	"env_fn",
+    "epochs":	200,
+    "exp_name":	"MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16",
+    "gamma":	0.99,
+    "logger":	{
+        "<spinup.utils.logx.EpochLogger object at 0x13d791d50>":	{
+            "epoch_dict":	{},
+            "exp_name":	"MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16",
+            "first_row":	true,
+            "log_current_row":	{},
+            "log_headers":	[],
+            "output_dir":	"../../data/PETR3_VALE3_ABEV3_2014_2014_True/MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16/MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16_s9",
+            "output_file":	{
+                "<_io.TextIOWrapper name='../../data/PETR3_VALE3_ABEV3_2014_2014_True/MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16/MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16_s9/progress.txt' mode='w' encoding='UTF-8'>":	{
+                    "mode":	"w"
+                }
+            }
+        }
+    },
+    "logger_kwargs":	{
+        "exp_name":	"MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16",
+        "output_dir":	"../../data/PETR3_VALE3_ABEV3_2014_2014_True/MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16/MarketDDPG_ste1000_epo200_rep500000_gam0-99_pol0-995_pi0-0005_ql0-0001_bat100_sta10000_upd900_act1-0_ac-hid16-16_s9"
+    },
+    "max_ep_len":	1000,
+    "noise_reduction":	0.005555555555555556,
+    "num_test_episodes":	10,
+    "pi_lr":	0.0005,
+    "polyak":	0.995,
+    "q_lr":	0.0001,
+    "replay_size":	500000,
+    "save_freq":	1,
+    "seed":	9,
+    "start_steps":	10000,
+    "steps_per_epoch":	1000,
+    "update_after":	900,
+    "update_every":	50
+}
