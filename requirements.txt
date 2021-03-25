@@ -7,5 +7,5 @@ sphinx-rtd-theme==0.5.0
 -e git+https://github.com/EmpyreanAI/RMM#egg=rmm
 gym
 -e ./envs/gym_market
-PyYAML==5.3.1   
+PyYAML==5.4   
     
